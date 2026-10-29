@@ -20,6 +20,7 @@
         turbo
 
         typescript_7
+        prettierd
       ];
     };
   };

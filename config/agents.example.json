@@ -1,0 +1,25 @@
+{
+    "agents": [
+        {
+            "id": "fake",
+            "name": "Fake agent (no tokens)",
+            "command": "node",
+            "args": ["./apps/server/fixtures/fake-agent.ts"],
+            "env": {}
+        },
+        {
+            "id": "opencode",
+            "name": "OpenCode",
+            "command": "opencode",
+            "args": ["acp"],
+            "env": {}
+        },
+        {
+            "id": "codex",
+            "name": "Codex",
+            "command": "npx",
+            "args": ["-y", "@agentclientprotocol/codex-acp"],
+            "env": {}
+        }
+    ]
+}

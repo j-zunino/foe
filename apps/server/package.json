@@ -1,0 +1,32 @@
+{
+    "name": "@repo/server",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc -p tsconfig.build.json",
+        "start": "node dist/index.js",
+        "typecheck": "tsc -p tsconfig.json",
+        "lint": "eslint .",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@agentclientprotocol/sdk": "catalog:",
+        "@fastify/websocket": "catalog:",
+        "fastify": "catalog:",
+        "ws": "catalog:",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@repo/eslint-config": "workspace:*",
+        "@repo/typescript-config": "workspace:*",
+        "@types/node": "catalog:",
+        "@types/ws": "catalog:",
+        "eslint": "catalog:",
+        "tsx": "catalog:",
+        "typescript": "catalog:",
+        "vite": "catalog:",
+        "vitest": "catalog:"
+    }
+}

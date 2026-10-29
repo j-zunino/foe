@@ -1,1 +1,23 @@
-.direnv
+*.local
+*.pem
+*.tsbuildinfo
+.DS_Store
+.direnv/
+.env
+.output
+.tanstack
+.turbo
+build
+coverage
+dist
+dist-ssr
+node_modules
+npm-debug.log*
+routeTree.gen.ts
+yarn-debug.log*
+yarn-error.log*
+
+# agents
+.codex
+.commandcode
+.opencode

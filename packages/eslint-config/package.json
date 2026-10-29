@@ -1,0 +1,23 @@
+{
+    "name": "@repo/eslint-config",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./index.js",
+        "./node": "./node.js",
+        "./react": "./react.js"
+    },
+    "dependencies": {
+        "@eslint/js": "catalog:",
+        "eslint-config-prettier": "catalog:",
+        "eslint-plugin-react-hooks": "catalog:",
+        "eslint-plugin-react-refresh": "catalog:",
+        "globals": "catalog:",
+        "typescript": "6.0.3",
+        "typescript-eslint": "catalog:"
+    },
+    "peerDependencies": {
+        "eslint": "^10.0.0"
+    }
+}
