@@ -1,6 +1,9 @@
-import { buildApp } from "./app.js";
-import { DEFAULT_HOST, DEFAULT_PORT } from "./config.js";
+import Fastify from "fastify";
+import { config } from "./config.js";
+import { routes } from "./routes/index.js";
 
-const app = buildApp();
+const fastify = Fastify({ logger: true });
 
-await app.listen({ host: DEFAULT_HOST, port: DEFAULT_PORT });
+fastify.register(routes, { prefix: "/api" });
+
+await fastify.listen({ host: config.DEFAULT_HOST, port: config.DEFAULT_PORT });
