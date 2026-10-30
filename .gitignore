@@ -9,6 +9,7 @@
 .turbo
 build
 coverage
+data/
 dist
 dist-ssr
 node_modules

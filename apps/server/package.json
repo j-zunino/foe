@@ -9,11 +9,15 @@
         "start": "node dist/index.js",
         "typecheck": "tsc -p tsconfig.json",
         "lint": "eslint .",
-        "test": "vitest run"
+        "test": "vitest run",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate"
     },
     "dependencies": {
         "@agentclientprotocol/sdk": "catalog:",
         "@fastify/websocket": "catalog:",
+        "better-sqlite3": "^13.0.3",
+        "drizzle-orm": "^0.45.4",
         "fastify": "catalog:",
         "ws": "catalog:",
         "zod": "catalog:"
@@ -21,8 +25,10 @@
     "devDependencies": {
         "@repo/eslint-config": "workspace:*",
         "@repo/typescript-config": "workspace:*",
+        "@types/better-sqlite3": "^9.6.0",
         "@types/node": "catalog:",
         "@types/ws": "catalog:",
+        "drizzle-kit": "^0.31.11",
         "eslint": "catalog:",
         "tsx": "catalog:",
         "typescript": "catalog:",

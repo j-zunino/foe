@@ -4,5 +4,5 @@
         "noEmit": true,
         "rootDir": "."
     },
-    "include": ["src", "fixtures", "vitest.config.ts"]
+    "include": ["src", "fixtures", "vitest.config.ts", "drizzle.config.ts"]
 }
