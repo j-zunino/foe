@@ -3,7 +3,7 @@
         {
             "id": "fake",
             "name": "Fake agent (no tokens)",
-            "command": "node",
+            "command": "./apps/server/node_modules/.bin/tsx",
             "args": ["./apps/server/fixtures/fake-agent.ts"],
             "env": {}
         },
