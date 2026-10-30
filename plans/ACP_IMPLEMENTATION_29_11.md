@@ -1,14 +1,23 @@
-# ACP Web GUI — Implementation Plan
+# ACP Web GUI — Implementation Plan (v2)
 
-Status: Revised draft
-Protocol: ACP v1 stable (`@agentclientprotocol/sdk` default entrypoint)
-Runtime: Node.js 22+, `ws`, React, Vite, TypeScript
+Protocol: ACP v1 stable (`@agentclientprotocol/sdk` 2.1.0, named exports only)
+Runtime: Node.js 24+, pnpm 12, Fastify 5 + zod 4, `@fastify/websocket`, React, Vite, TypeScript
 Role: UI orchestrator, not an agent harness
 
-Revision note: v1 no longer implements ACP filesystem or terminal methods. The
+Revision note (v2):
+
+- The web UI moves to the end of v1. M0–M4 finish, harden, and document the
+  backend and its WebSocket protocol; M4 freezes that protocol. M5–M7 build the
+  UI against it.
+- The plan is aligned with the `foe` monorepo it lives in: pnpm workspaces +
+  turbo, `apps/server` and `apps/web`, Fastify + zod instead of `node:http` with
+  manual routing, and no shared package until M5.
+- Every SDK sketch is corrected for `@agentclientprotocol/sdk` 2.1.0.
+
+Design note: this does not implement ACP filesystem or terminal methods. The
 backend is a thin ACP client that launches existing agent harnesses (OpenCode,
-Codex, and similar), streams their typed events to one web UI, and
-brokers permission prompts. Agents keep their own file and terminal tooling.
+Codex, and similar), streams their typed events to one web UI, and brokers
+permission prompts. Agents keep their own file and terminal tooling.
 
 ---
 
@@ -28,6 +37,10 @@ The browser never speaks ACP. It uses a small custom WebSocket protocol for one 
 
 This keeps the browser thin, keeps the backend out of the harness business, and avoids reimplementing what OpenCode, Codex, etc already do.
 
+Delivery order matters more than feature order here: the backend and its wire
+protocol are finished and documented before any React is written, so UI needs
+cannot quietly reshape the protocol.
+
 ---
 
 ## 2. Confirmed decisions
@@ -38,8 +51,10 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 | Agents              | Configurable command presets; multiple concurrent agents                                                                   |
 | v1 features         | New chat, prompt, streaming updates, permissions, cancel                                                                   |
 | Deployment          | Local single user, bind `127.0.0.1`                                                                                        |
-| Stack               | Node + `ws` + React/Vite                                                                                                   |
-| Repo                | Separate repository                                                                                                        |
+| Repo                | This repo: `foe` monorepo (pnpm workspaces + turbo)                                                                        |
+| Stack               | Fastify + zod + `@fastify/websocket`/`ws`; React + Vite on the client                                                      |
+| Milestone order     | Backend M0–M4, then UI M5–M7                                                                                               |
+| Protocol types      | `apps/server/src/protocol.ts` until M5, then `packages/protocol` (`@repo/protocol`)                                        |
 | Protocol            | ACP v1 stable                                                                                                              |
 | ACP client surface  | `initialize`, `session/new`, `session/prompt`, `session/cancel`; handles `session/update` and `session/request_permission` |
 | Filesystem          | Not implemented. Client advertises `fs: { readTextFile: false, writeTextFile: false }`; agents use their own tools         |
@@ -57,6 +72,7 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 4. **Agent presets are edited in `config/agents.json`.** No agent-management UI in v1.
 5. **Agents own their tools.** OpenCode, Codex, etc run their own file operations and commands. The backend only launches them, transports ACP messages, and renders updates.
 6. **The CLI login is the auth boundary.** `opencode auth login`, `codex login` happen outside this UI. If `session/new` fails, the UI shows the failure and the agent's advertised auth methods so the user knows what to run.
+7. **The backend is useful without a browser.** At the end of M4 the REST and WebSocket APIs are complete and driveable with `curl` and `wscat`; the UI is a client of a frozen protocol, not a co-designer of it.
 
 ---
 
@@ -73,6 +89,8 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 - Launch each agent with the project directory as its `cwd`.
 - Surface unsupported client methods and authentication failures clearly.
 - Run the whole flow against a fake agent without network or tokens.
+- Ship the backend as a usable product on its own: the WS protocol is drivable
+  with `wscat` before any UI exists.
 
 ### Non-goals for v1
 
@@ -87,7 +105,8 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 - Markdown rendering, file diff viewer, or terminal output view. Agents report
   diffs and tool output as `session/update` content; the UI renders that subset.
 - Session modes and config option UI.
-- Production static asset serving (Vite dev server is enough initially).
+- Production static asset serving. A Vite dev server (proxied to the backend)
+  is enough initially; static serving is a decision left open in section 15.
 
 ---
 
@@ -96,6 +115,7 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 ```
 ┌──────────────────────────────┐
 │ Browser (React + Vite)       │
+│ built in M5–M7               │
 │                              │
 │ Project sidebar              │
 │ Chat list per project        │
@@ -106,9 +126,10 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
                │ WebSocket /ws (one socket per chat)
                │
 ┌──────────────▼───────────────┐
-│ Backend (node:http + ws)     │
+│ Backend (Fastify + zod)      │
 │                              │
-│ HTTP API                     │
+│ HTTP routes                  │
+│ WS route                     │
 │ Project registry             │
 │ Chat connection handler      │
 │ Permission bridge            │
@@ -124,6 +145,10 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 └──────────────────────────────┘
 ```
 
+`/api` and `/ws` are complete and testable at the end of M4. Everything above
+the backend box in the diagram is M5–M7 work and consumes the protocol without
+changing it.
+
 ### Trust boundaries
 
 - Browser to backend: local unauthenticated HTTP/WS on loopback. Never expose publicly.
@@ -136,54 +161,66 @@ This keeps the browser thin, keeps the backend out of the harness business, and 
 ## 5. Repository layout
 
 ```
-acp-web/
-├── package.json                  # npm workspaces: shared, server, web
-├── package-lock.json
-├── tsconfig.base.json
-├── .gitignore                    # node_modules, dist, config/agents.json
-├── README.md                     # setup, run, security, presets, troubleshooting
+foe/
+├── package.json                # turbo scripts (exists)
+├── pnpm-workspace.yaml         # apps/*, packages/*, catalog (exists)
+├── turbo.json                  # exists
+├── config/agents.example.json  # exists; fake preset switched to tsx in M0
 ├── docs/
-│   ├── protocol.md               # WS protocol and chat lifecycle
-│   └── agent-presets.md          # per-agent commands, login, env, limits
-├── config/
-│   └── agents.example.json
-├── shared/
-│   ├── package.json
-│   └── src/
-│       └── protocol.ts           # WS message types + parse helpers
-├── server/
-│   ├── package.json
-│   ├── fixtures/
-│   │   └── fake-agent.ts         # scripted ACP agent for tests and demos
-│   └── src/
-│       ├── index.ts              # bootstrap, routing, shutdown
-│       ├── config.ts             # agents.json, data dir, port
-│       ├── projects.ts           # in-memory project registry
-│       ├── http.ts               # REST API
-│       ├── chat.ts               # WebSocket -> ChatSession
-│       ├── agent-process.ts      # spawn, ACP wiring, process kill
-│       ├── config.test.ts
-│       ├── projects.test.ts
-│       └── chat.test.ts
-└── web/
-    ├── package.json
-    ├── vite.config.ts            # proxy /api and /ws to the server
-    ├── index.html
-    └── src/
-        ├── main.tsx
-        ├── App.tsx
-        ├── api.ts
-        ├── chat-store.ts
-        ├── components/
-        │   ├── ProjectSidebar.tsx
-        │   ├── ChatList.tsx
-        │   ├── ChatView.tsx
-        │   ├── PromptInput.tsx
-        │   └── PermissionDialog.tsx
-        └── styles.css
+│   ├── protocol.md             # new (M4)
+│   └── agent-presets.md        # new (M4)
+├── apps/
+│   ├── server/
+│   │   ├── fixtures/
+│   │   │   └── fake-agent.ts        # M2
+│   │   ├── vitest.config.ts         # exists
+│   │   └── src/
+│   │       ├── index.ts             # exists → uses buildApp()
+│   │       ├── config.ts            # exists stub → env + agents.json (M0)
+│   │       ├── protocol.ts          # M3; moves to packages/protocol in M5
+│   │       ├── lib/
+│   │       │   ├── fastify.ts       # exists → app factory
+│   │       │   ├── projects.ts      # M1
+│   │       │   ├── agents.ts        # M1 preset loading and resolution
+│   │       │   ├── agent-process.ts # M2
+│   │       │   └── chat.ts          # M3
+│   │       └── routes/
+│   │           ├── index.ts         # exists
+│   │           ├── api/
+│   │           │   ├── health.ts    # exists
+│   │           │   ├── projects.ts  # M1
+│   │           │   └── agents.ts    # M1
+│   │           └── ws/
+│   │               └── chat.ts      # M3
+│   └── web/                         # M5
+│       ├── package.json             # @repo/web
+│       ├── vite.config.ts           # proxy /api and /ws to the server
+│       ├── tsconfig.json            # extends @repo/typescript-config/vite.json
+│       ├── eslint.config.js         # @repo/eslint-config/react
+│       ├── index.html
+│       └── src/
+│           ├── main.tsx
+│           ├── App.tsx
+│           ├── api.ts
+│           ├── chat-store.ts
+│           ├── components/
+│           │   ├── ProjectSidebar.tsx
+│           │   ├── ChatList.tsx
+│           │   ├── ChatView.tsx
+│           │   ├── PromptInput.tsx
+│           │   └── PermissionDialog.tsx
+│           └── styles.css
+└── packages/
+    ├── protocol/                # M5: @repo/protocol
+    ├── eslint-config/           # exists (has react.js already)
+    └── typescript-config/       # exists (has vite.json and react-library.json)
 ```
 
-No state library, router, UI kit, or schema validator in v1. The protocol has four client messages and a few server messages; manual parsing is enough.
+No router, state management library, UI kit, or Markdown renderer in v1. zod is
+already a server dependency and stays the validation layer for both HTTP bodies
+and WebSocket client messages. `@repo/eslint-config/react` and
+`@repo/typescript-config/vite.json` already exist, so M5 adds no new config
+packages.
 
 ---
 
@@ -191,17 +228,19 @@ No state library, router, UI kit, or schema validator in v1. The protocol has fo
 
 ### 6.1 REST API
 
-All responses are JSON. Errors use `{ "error": string }` with an appropriate status code.
+All routes are Fastify route modules under `apps/server/src/routes/api/` and are
+registered under the `/api` prefix. All responses are JSON. Errors use
+`{ "error": string }` with an appropriate status code.
 
 | Method   | Path                | Body                 | Response                                  |
 | -------- | ------------------- | -------------------- | ----------------------------------------- |
-| `GET`    | `/api/health`       | —                    | `{ "ok": true }`                          |
+| `GET`    | `/api/health`       | —                    | `{ "ok": true }` (already implemented)    |
 | `GET`    | `/api/agents`       | —                    | `[{ "id", "name" }]`                      |
 | `GET`    | `/api/projects`     | —                    | `[{ "id", "name", "path", "available" }]` |
 | `POST`   | `/api/projects`     | `{ "name", "path" }` | `201` project                             |
 | `DELETE` | `/api/projects/:id` | —                    | `204`                                     |
 
-Validation rules:
+Validation is a zod schema per body, parsed with `safeParse` in the handler:
 
 - `name` is non-empty after trimming.
 - `path` is absolute, exists, and is a directory.
@@ -209,14 +248,19 @@ Validation rules:
 - Reject duplicates by canonical path with `409`.
 - `GET /api/agents` returns only `id` and `name`. Never return `env` values; they may contain API keys.
 
+Fastify's `bodyLimit` is set once in the app factory (1 MiB) rather than
+per route.
+
 ### 6.2 WebSocket
 
-Endpoint: `ws://127.0.0.1:8787/ws`
+Endpoint: `ws://127.0.0.1:8787/ws`, a `GET` route registered with
+`@fastify/websocket`. The plugin's `maxPayload` and the SDK's
+`ndJsonStream({ maxMessageBytes })` both use `acp.DEFAULT_MAX_MESSAGE_BYTES` so
+the browser limit and the backend-to-agent limit cannot drift apart.
 
 - One socket per chat.
 - The first message must be `start` within 10 seconds; otherwise close with code `4000`.
-- Invalid JSON or an unknown message type closes the socket with code `4001`.
-- Maximum payload: 16 MiB, matching the SDK transport example.
+- Client messages are parsed with a zod discriminated union on `type`. Invalid JSON or an unknown/invalid message type closes the socket with code `4001`.
 - Heartbeat: server ping every 30 seconds; terminate a socket that misses a pong.
 
 #### Client to server
@@ -263,6 +307,9 @@ type AuthMethodSummary = {
 There is no `authenticate` message in v1. `authMethods` is only included so the
 UI can tell the user which CLI login flow to run when `session/new` fails.
 
+`update` is forwarded as-is. The backend does not translate, filter, or buffer
+`SessionUpdate` payloads beyond checking `sessionId`.
+
 ### 6.3 Example exchange
 
 ```
@@ -291,29 +338,53 @@ of the `params.options[].optionId` values it received for that request.
 
 ## 7. Backend design
 
-### 7.1 Bootstrap (`server/src/index.ts`)
+### 7.1 Bootstrap (`apps/server/src/index.ts`, `src/lib/fastify.ts`)
 
-- Load config.
-- Create `node:http` server.
-- Route `/api/*` to the HTTP handler.
-- Handle `upgrade` for `/ws`; reject other paths.
-- Serve nothing else in v1 (Vite proxies in development).
-- Bind `127.0.0.1` by default; allow `HOST` override with a startup warning when not loopback.
-- Track all live chats and agent processes.
-- On `SIGINT` / `SIGTERM`: close WebSockets, kill processes, then exit.
+`buildApp()` in `lib/fastify.ts` is the single app factory, used by `index.ts`
+and by every integration test:
 
-### 7.2 Config (`server/src/config.ts`)
+```ts
+export function buildApp() {
+    return Fastify({ logger: true, bodyLimit: 1024 * 1024 });
+}
+```
+
+`index.ts` then:
+
+1. Loads config (`loadConfig`, `loadAgents`).
+2. Registers `@fastify/websocket` with `maxPayload: acp.DEFAULT_MAX_MESSAGE_BYTES`.
+3. Registers the REST plugin at prefix `/api`.
+4. Registers `GET /ws` (module `routes/ws/chat.ts`).
+5. Adds an `onClose` hook that closes all live chats and kills their processes.
+6. Binds `127.0.0.1` by default; warns at startup when `HOST` is not loopback.
+7. On `SIGINT` / `SIGTERM` calls `app.close()`, which triggers the `onClose`
+   teardown, then exits.
+
+`onClose` is the only shutdown path; do not duplicate teardown in the signal
+handlers.
+
+### 7.2 Config (`apps/server/src/config.ts`)
+
+The current file is a stub with `DEFAULT_HOST` / `DEFAULT_PORT` and a TODO.
+M0 replaces it with a zod-validated loader.
 
 Environment:
 
-| Variable         | Default                | Purpose       |
-| ---------------- | ---------------------- | ------------- |
-| `PORT`           | `8787`                 | HTTP/WS port  |
-| `HOST`           | `127.0.0.1`            | Bind address  |
-| `ACP_WEB_CONFIG` | `./config/agents.json` | Agent presets |
+| Variable      | Default                | Purpose                         |
+| ------------- | ---------------------- | ------------------------------- |
+| `PORT`        | `8787`                 | HTTP/WS port                    |
+| `HOST`        | `127.0.0.1`            | Bind address                    |
+| `AGENTS_FILE` | `./config/agents.json` | Agent presets, relative to root |
 
 No persistence configuration exists in v1. A future database will add its own
 connection settings.
+
+`findRepoRoot()`: walk up from `process.cwd()` until a directory containing
+`pnpm-workspace.yaml` is found; throw with a clear message if none is found.
+Resolve `AGENTS_FILE` and every preset `command` or argument that starts with
+`./` against that root. This is required because turbo runs tasks with the
+package directory as `cwd`, so `./config/agents.json` would otherwise resolve to
+`apps/server/config/`.
 
 `agents.json`:
 
@@ -323,8 +394,8 @@ connection settings.
         {
             "id": "fake",
             "name": "Fake agent (no tokens)",
-            "command": "./node_modules/.bin/tsx",
-            "args": ["./server/fixtures/fake-agent.ts"],
+            "command": "./apps/server/node_modules/.bin/tsx",
+            "args": ["./apps/server/fixtures/fake-agent.ts"],
             "env": {}
         },
         {
@@ -346,7 +417,11 @@ connection settings.
 ```
 
 - Validate ids are unique and commands are non-empty.
-- The child runs with `cwd` set to the project directory. Because of that, `command` and any `args` starting with `./` resolve against the acp-web repository root, not the child `cwd`. Resolve them to absolute paths at spawn time. Document this in the README so real agent presets can rely on normal `PATH` lookup for bare commands.
+- The child runs with `cwd` set to the project directory. Preset paths that
+  start with `./` are resolved to absolute paths against the repo root at spawn
+  time; bare commands use normal `PATH` lookup. Document this in the README.
+- The fake preset points at the workspace-local `tsx` binary so it does not
+  depend on Node's type stripping or on `tsx` being on `PATH`.
 - The preset `env` is merged over `process.env` for the child only.
 - Do not log `env` values.
 - `npx -y` fetches the adapter on first run and may drift across versions. Pin
@@ -354,7 +429,7 @@ connection settings.
   runs.
 - These presets assume the user already ran `opencode auth login`, `codex login`. See `docs/agent-presets.md`.
 
-### 7.3 Project registry (`server/src/projects.ts`)
+### 7.3 Project registry (`apps/server/src/lib/projects.ts`)
 
 ```ts
 interface Project {
@@ -379,14 +454,17 @@ Future persistence:
   clean up records whose paths or processes are missing.
 - Adding database persistence later must not change the WebSocket protocol.
 
-### 7.4 HTTP API (`server/src/http.ts`)
+### 7.4 HTTP API (`apps/server/src/routes/api/*.ts`)
 
-- Manual routing on `req.method` and `new URL(req.url, base).pathname`.
-- Body limit: 1 MiB. Parse JSON in a try/catch and return `400` on failure.
+- One Fastify route module per resource, registered in `routes/index.ts`.
+- Each `POST` body is parsed with a zod schema via `safeParse`; failures return
+  `400` before the registry is touched.
 - Status codes: `400` invalid body/path, `404` unknown project, `409` duplicate path, `500` unexpected.
 - `DELETE` only removes the in-memory project entry. It never deletes the directory.
+- `GET /api/agents` maps presets to `{ id, name }`; the mapping is the only
+  place env can leak, so it is tested.
 
-### 7.5 Agent process (`server/src/agent-process.ts`)
+### 7.5 Agent process (`apps/server/src/lib/agent-process.ts`)
 
 Responsibilities:
 
@@ -397,9 +475,11 @@ Responsibilities:
 - Create the session.
 - Expose `prompt`, `cancel`, and `close`.
 
-Sketch:
+Sketch (corrected for SDK 2.1.0):
 
 ```ts
+import * as acp from "@agentclientprotocol/sdk";
+
 const child = spawn(preset.command, preset.args, {
     cwd,
     env: { ...process.env, ...preset.env },
@@ -415,12 +495,13 @@ const stream = acp.ndJsonStream(
 let sessionId: string | undefined;
 
 const app = acp
-    .client({ name: "acp-web" })
+    .client({ name: "foe" })
     .onNotification(acp.methods.client.session.update, ({ params }) => {
         if (params.sessionId === sessionId) onUpdate(params.update);
     })
-    .onRequest(acp.methods.client.session.requestPermission, ({ params }) =>
-        requestPermission(params),
+    .onRequest(
+        acp.methods.client.session.requestPermission,
+        ({ params, requestId }) => requestPermission(requestId, params),
     );
 
 const connection = app.connect(stream);
@@ -442,6 +523,12 @@ sessionId = session.sessionId;
 
 Notes:
 
+- The package has **named exports only**. `import acp from ...` does not exist.
+  Use `import * as acp from "@agentclientprotocol/sdk"`.
+- `acp.client(...)` handlers receive a single context object (method, params,
+  signal, agent, requestId). Read `params` from it; do not expect a positional
+  `params` argument.
+- `app.connect(stream)` is synchronous and takes the `ndJsonStream` result.
 - Explicitly advertise `fs` and `terminal` as `false`. This tells the agent to
   use its own file and command tools. A published Gemini CLI ACP walkthrough
   does the same, and Gemini falls back to its local disk tooling.
@@ -466,6 +553,8 @@ await connection.agent.request(acp.methods.agent.session.prompt, {
 });
 ```
 
+`prompt` is an array of content blocks, not a string.
+
 Cancel:
 
 ```ts
@@ -475,6 +564,21 @@ resolveAllPermissionsAsCancelled();
 await connection.agent.notify(acp.methods.agent.session.cancel, { sessionId });
 ```
 
+`session/cancel` is a notification on the agent side. Sending it as a request
+does not type-check.
+
+Permission responses:
+
+```ts
+// selected
+return { outcome: { outcome: "selected", optionId } };
+// cancelled
+return { outcome: { outcome: "cancelled" } };
+```
+
+The outcome is a union of objects whose `outcome` field is itself an object. Do
+not send `{ outcome: "selected", optionId }`.
+
 Allowed concurrency: one in-flight prompt per chat. A second `prompt` message while running returns `error` with “prompt already running”.
 
 Teardown:
@@ -483,7 +587,7 @@ Teardown:
 2. `connection.close()`.
 3. `SIGTERM` the process group; `SIGKILL` after 3 seconds.
     - POSIX: `process.kill(-child.pid, signal)`.
-    - Windows: `child.kill()`.
+    - Windows: `child.kill()`, then `taskkill /pid <pid> /T /F` as fallback.
 4. Remove the chat from the registry.
 
 ### 7.6 Unsupported client methods and auth failures
@@ -511,9 +615,12 @@ Authentication failures:
 - A later version can add a generic `authenticate` step if browser-based login
   becomes a requirement.
 
-### 7.7 Chat handler (`server/src/chat.ts`)
+### 7.7 Chat handler (`apps/server/src/lib/chat.ts`, `routes/ws/chat.ts`)
 
-Owns the WebSocket lifecycle:
+`routes/ws/chat.ts` is a thin `GET /ws` route: `@fastify/websocket` gives it
+`(socket, req)`, and it hands the socket to `createChat(...)` from
+`lib/chat.ts`. Everything below lives in `lib/chat.ts` and is testable without
+Fastify route plumbing.
 
 ```ts
 interface Chat {
@@ -535,12 +642,20 @@ Sequence:
 6. On close/error: resolve pending permissions as cancelled; tear down agent; clear timers.
 7. On agent process exit: send `closed` with the stderr tail; close the socket.
 8. On `session/new` failure with advertised auth methods: send `error` with `authMethods`; close.
+9. On app shutdown (`onClose`): tear down every chat the same way as step 6.
 
 Guard against races: a WebSocket close while `initialize` is in flight must still kill the child.
 
 ---
 
 ## 8. Frontend design
+
+Everything in this section is implemented in M5–M7. The wire protocol is frozen
+at the end of M4; if a UI requirement needs a protocol change, that is a gap in
+M4, and the fix belongs in the backend milestone, not in the React code.
+
+Types come from `@repo/protocol` (extracted in M5). There is no
+`apps/web/src/protocol.ts` and no duplicated message types.
 
 ### 8.1 State
 
@@ -620,7 +735,7 @@ client protocol`. v1 can just send the typed text.
 - `prompt_done` sets status `idle` and re-enables input.
 - `cancel` sets an optimistic “cancelling” flag; the final `prompt_done` with `cancelled` restores `idle`.
 - `error` shows a banner; `closed` marks the chat ended and disables input.
-- Closing a chat sends `stop` by closing the socket; backend teardown follows.
+- Closing a chat closes the socket; backend teardown follows.
 
 There is no automatic reconnect in v1. A refresh loses chats by design.
 
@@ -638,13 +753,34 @@ Plain text in `<pre>`-like blocks is enough for v1. Markdown rendering is a late
 
 ## 9. Fake agent fixture
 
-`server/fixtures/fake-agent.ts` is a standalone ACP agent using `acp.agent(...)` and:
+`apps/server/fixtures/fake-agent.ts` is a standalone ACP agent using
+`acp.agent({ name })`. It registers its `initialize` handler first: the SDK
+rejects every other request with `-32600` until initialize succeeds. Request
+params are validated by the SDK before the handler runs, so the fixture only
+handles well-formed input.
 
 ```ts
+import * as acp from "@agentclientprotocol/sdk";
+
 const stream = acp.ndJsonStream(
     Writable.toWeb(process.stdout),
     Readable.toWeb(process.stdin) as ReadableStream<Uint8Array>,
 );
+
+const app = acp
+    .agent({ name: "fake" })
+    .onRequest(acp.methods.agent.initialize, () => ({
+        protocolVersion: acp.PROTOCOL_VERSION,
+    }))
+    .onRequest(acp.methods.agent.session.new, () => ({ sessionId: "fake-s1" }))
+    .onRequest(acp.methods.agent.session.prompt, ({ params, client }) =>
+        runPrompt(params, client),
+    )
+    .onNotification(acp.methods.agent.session.cancel, () => {
+        cancelled = true;
+    });
+
+app.connect(stream);
 ```
 
 Behavior keyed by prompt text so tests are deterministic:
@@ -665,15 +801,18 @@ Environment switches for integration tests:
 
 It never makes network calls and never consumes model tokens.
 
-Use it as the default preset in `agents.example.json` so manual testing works immediately.
+Use it as the default preset in `config/agents.example.json` so manual testing works immediately.
 
 ---
 
 ## 10. Testing strategy
 
+The backend is fully tested before any UI exists. Frontend work in M5–M7 is
+verified by the manual checklist only; there are no browser tests in v1.
+
 ### Unit tests
 
-`projects.test.ts`
+`apps/server/src/lib/projects.test.ts`
 
 - Add, list, delete.
 - Relative, nonexistent, and non-directory paths are rejected.
@@ -682,16 +821,23 @@ Use it as the default preset in `agents.example.json` so manual testing works im
   not removed.
 - Restarting the registry starts empty (v1 behavior).
 
-`config.test.ts`
+`apps/server/src/lib/agents.test.ts` and `apps/server/src/config.test.ts`
 
 - Agent ids are unique.
+- `findRepoRoot()` resolves from `apps/server` and from the repo root.
 - Relative `./` command and args resolve against the repository root while the
   child still runs with the project `cwd`.
 - `env` is preserved for the child but never returned by `GET /api/agents`.
 
+`apps/server/src/routes/api/projects.test.ts`
+
+- Fastify `inject` against `buildApp()`: `400` for invalid body/path, `409` for
+  duplicates, `404` for unknown ids, `201`/`204` on the happy path.
+
 ### Integration tests
 
-`chat.test.ts` starts the real server on port `0` and spawns the fake agent.
+`apps/server/src/lib/chat.test.ts` starts the real app on port `0` and spawns
+the fake agent.
 
 Scenarios:
 
@@ -709,57 +855,79 @@ Scenarios:
 8. `FAKE_AGENT_REQUIRE_AUTH=1` yields an `error` frame carrying `authMethods`;
    no `authenticate` request is sent.
 9. Closing the WebSocket kills the agent process within the timeout.
-10. Invalid client messages close the socket.
+10. Invalid client messages close the socket with `4001`; a missing `start`
+    closes with `4000`.
+11. `app.close()` kills every live agent process.
 
-Run with `vitest`. Use `ws` as the test WebSocket client.
+Run with `vitest` (`pnpm --filter @repo/server test`). Use `ws` as the test
+WebSocket client.
 
 ### Manual checks
 
+Backend (available at the end of M4):
+
 1. Configure the fake agent preset.
 2. Add a project directory.
-3. Open two chats in the same project and run prompts concurrently.
+3. Open two chats in the same project with `wscat` and run prompts concurrently.
 4. Exercise permission allow, reject, and cancel.
-5. Cancel a slow prompt while a permission dialog is open.
+5. Cancel a slow prompt while a permission request is open.
 6. Close a chat and verify no agent process remains (`ps`).
 7. Repeat with OpenCode, Codex, etc presets after logging in with each CLI.
 
-No automated tests against real agents; adapters differ and may require credentials.
+UI (M5–M7):
+
+1. Add and remove a project from the sidebar.
+2. Create a chat per agent preset and send a prompt.
+3. Switch chats while a background chat streams.
+4. Resolve a permission request from the dialog; cancel one.
+5. Stop a running prompt and confirm the dialog dismisses.
+6. Kill an agent process and confirm the chat shows an ended/error state.
 
 ### Documentation checks
 
 - A fresh clone can run the fake agent end to end using only the README.
 - Every command in `docs/agent-presets.md` is copy-pasteable and uses absolute
   paths where the backend requires them.
-- The WS protocol example in `docs/protocol.md` matches the `shared` types.
+- The WS protocol example in `docs/protocol.md` matches `apps/server/src/protocol.ts`.
 
 ---
 
 ## 11. Milestones
 
-### M0 — Scaffold
+M0–M4 have no browser dependency and touch only `apps/server` and `config/`.
+M4 freezes the wire protocol. M5–M7 build the UI against a frozen protocol; they
+must not require protocol changes. If one does, that is a bug in M4.
+
+### M0 — Server scaffold and config
 
 Deliverables:
 
-- Workspace `package.json`, TypeScript configs, `.gitignore`.
-- `shared/src/protocol.ts`.
-- `server/src/index.ts` answering `GET /api/health`.
-- `web` Vite app rendering an empty shell.
-- `config/agents.example.json`.
+- `lib/fastify.ts` `buildApp()` becomes the only app factory (`bodyLimit` 1 MiB);
+  `index.ts` uses it instead of constructing Fastify inline.
+- `config.ts`: `findRepoRoot()`, zod-validated `loadConfig()` (`HOST`, `PORT`,
+  `AGENTS_FILE`) and `loadAgents()`.
+- `config/agents.example.json`: fake preset switched to the workspace-local
+  `tsx` binary with `./`-relative paths.
+- Turbo/pnpm workspace files already exist; no changes expected.
 
 Acceptance:
 
-- `npm install`
-- `npm run typecheck`
-- `curl http://127.0.0.1:8787/api/health` returns `{ "ok": true }`.
-- `npm run dev -w web` loads in the browser.
+- `pnpm install`
+- `pnpm typecheck` and `pnpm lint`
+- `pnpm --filter @repo/server dev`, then
+  `curl http://127.0.0.1:8787/api/health` returns `{ "ok": true }`.
+- A missing `AGENTS_FILE` fails startup with a message naming the path.
+- The stub TODO in `config.ts` is gone.
 
 ### M1 — Projects and agent presets
 
 Deliverables:
 
-- `config.ts`, `projects.ts`, `http.ts`.
-- REST API for projects and agents.
-- Unit tests.
+- `lib/projects.ts` (in-memory registry, canonical paths).
+- `lib/agents.ts` (preset loading, `./` path resolution, env stripping).
+- `routes/api/projects.ts`, `routes/api/agents.ts`, registered in `routes/index.ts`.
+- zod body schemas.
+- Unit and `inject` tests.
 
 Acceptance:
 
@@ -767,15 +935,18 @@ Acceptance:
 - Restart the backend; the project list starts empty. v1 is in-memory by design.
 - Invalid paths and duplicates return `400`/`409`.
 - Env values never appear in `GET /api/agents`.
+- `pnpm --filter @repo/server test` passes.
 
 ### M2 — Agent process and ACP client
 
 Deliverables:
 
-- `agent-process.ts` with spawn, ACP wiring, initialize, session creation.
-- Explicit `fs: { readTextFile: false, writeTextFile: false }` and `terminal: false` capabilities.
-- `fake-agent.ts`.
-- Unit tests for config; a minimal script-level test that prompts the fake agent.
+- `lib/agent-process.ts` with spawn, ACP wiring, initialize, session creation,
+  prompt, cancel, teardown, stderr ring buffer.
+- Explicit `fs: { readTextFile: false, writeTextFile: false }` and
+  `terminal: false` capabilities.
+- `fixtures/fake-agent.ts`.
+- A script-level test that prompts the fake agent.
 
 Acceptance:
 
@@ -788,7 +959,9 @@ Acceptance:
 
 Deliverables:
 
-- `chat.ts` with the message protocol, permission bridge, cancel, teardown, heartbeat.
+- `src/protocol.ts`: client message zod union, server message types.
+- `lib/chat.ts` with the message protocol, permission bridge, cancel, teardown.
+- `routes/ws/chat.ts` registering `GET /ws` with `@fastify/websocket`.
 - Integration tests.
 
 Acceptance:
@@ -797,34 +970,69 @@ Acceptance:
 - A `wscat` session can drive a full prompt and a permission request.
 - Cancel resolves an open permission request before ending the turn.
 - Two chats run concurrently.
+- Invalid messages close the socket with the documented codes.
 
-### M4 — Frontend shell
+### M4 — Hardening, documentation, protocol freeze
 
 Deliverables:
 
-- `api.ts`, `App.tsx`, project sidebar, add/remove project form.
-- Chat list and new-chat flow with agent picker.
+- Fastify `onClose` teardown of every live chat.
+- Heartbeat ping every 30 seconds and stale-socket cleanup.
+- Payload limits from `acp.DEFAULT_MAX_MESSAGE_BYTES` on both WS and NDJSON.
+- Process-group kill verification (POSIX and Windows fallback).
+- Startup/shutdown logging that names the bind address and the agents file.
+- `README.md` with setup, run, security, presets, and troubleshooting.
+- `docs/protocol.md` with the WS message types, lifecycle, and error frames,
+  marked **frozen for v1** with the pinned SDK version recorded.
+- `docs/agent-presets.md` with tested commands and login steps for OpenCode,
+  Codex, the fake agent, and notes for Gemini CLI.
+- A short “Resources” section in the README (section 17).
 
 Acceptance:
 
-- Projects can be managed from the UI.
+- Start two chats, kill the backend with `Ctrl+C`, verify no orphan agents.
+- Disconnect a socket and verify cleanup after the heartbeat timeout.
+- A fresh clone can run the fake agent end to end using only the README.
+- The documentation checks in section 10 pass.
+- `docs/protocol.md` states the protocol is frozen and names the SDK version.
+
+### M5 — Shared protocol package and frontend shell
+
+Deliverables:
+
+- Add `react`, `react-dom`, `@types/react`, `@types/react-dom`,
+  `@vitejs/plugin-react` to the `pnpm-workspace.yaml` catalog.
+- `packages/protocol` (`@repo/protocol`): move `src/protocol.ts` here, build to
+  `dist` with declarations so turbo `^build` orders it before consumers.
+- Server imports protocol types from `@repo/protocol`.
+- `apps/web`: Vite + React + TS, `tsconfig.json` extending
+  `@repo/typescript-config/vite.json`, `eslint.config.js` using
+  `@repo/eslint-config/react`, dev proxy for `/api` and `/ws`.
+- `api.ts`, `App.tsx`, `ProjectSidebar`, `ChatList`, new-chat flow with agent picker.
+
+Acceptance:
+
+- `pnpm install`, then `pnpm build` builds protocol before server and web.
+- `pnpm typecheck` and `pnpm lint` pass across the workspace.
+- `pnpm --filter @repo/web dev` loads in the browser.
+- Projects can be added and removed from the UI.
 - Creating a chat opens a socket and reaches `ready`.
 
-### M5 — Streaming chat UI
+### M6 — Streaming chat UI
 
 Deliverables:
 
 - `chat-store.ts` with the reducer and socket lifecycle.
-- `ChatView`, `PromptInput`, update rendering.
+- `ChatView`, `PromptInput`, update rendering per section 8.2.
 
 Acceptance:
 
 - Prompts stream live into the correct chat.
 - Switching chats does not stop background streams.
 - Multiple chats stream independently.
-- Tool calls and plans render without breaking.
+- Tool calls and plans render without breaking; unknown updates are ignored.
 
-### M6 — Permissions, cancel, errors
+### M7 — Permissions, cancel, errors
 
 Deliverables:
 
@@ -840,80 +1048,50 @@ Acceptance:
 - Stop returns the prompt to idle and dismisses any open permission dialog.
 - An auth failure shows the agent's error plus what CLI login to run.
 - Agent exit shows an ended/error state and disables input.
-
-### M7 — Hardening and documentation
-
-Deliverables:
-
-- Process-group kill verification on the target OS.
-- Heartbeat and stale-socket cleanup.
-- Startup/shutdown logging.
-- Optional static serving of `web/dist`.
-- `README.md` with setup, run, security, presets, and troubleshooting.
-- `docs/protocol.md` with the WS message types, lifecycle, and error frames.
-- `docs/agent-presets.md` with tested commands and login steps for OpenCode,
-  Codex, the fake agent, and notes for Gemini CLI.
-- A short “Resources” section in the README linking to the canonical ACP and
-  SDK documentation (see section 17).
-
-Acceptance:
-
-- Start two chats, kill the backend with `Ctrl+C`, verify no orphan agents.
-- Disconnect the network/socket and verify cleanup after the heartbeat timeout.
-- A fresh clone can run the fake agent end to end using only the README.
-- The documentation checks in section 10 pass.
+- The manual UI checklist in section 10 passes.
 
 ---
 
 ## 12. Dependencies
 
-Root dev:
+Already in the workspace (`pnpm-workspace.yaml` catalog or package manifests):
 
-- `typescript`, `tsx`, `vitest`, `@types/node`
+- Root dev: `typescript`, `prettier`, `turbo`, `eslint` and its plugins.
+- Server: `fastify`, `zod`, `@agentclientprotocol/sdk` (2.1.0), `ws`,
+  `@fastify/websocket`, `tsx`, `vitest`, `@types/node`, `@types/ws`.
+- Shared config packages: `@repo/eslint-config`, `@repo/typescript-config`.
 
-Server:
+Added in M5:
 
-- `@agentclientprotocol/sdk`
-- `ws`
-- `@types/ws` (dev)
-
-Web:
-
-- `react`, `react-dom`
-- `vite`, `@vitejs/plugin-react`
-- `@types/react`, `@types/react-dom` (dev)
-
-Shared:
-
-- `@agentclientprotocol/sdk` (type-only)
+- Catalog: `react`, `react-dom`, `@types/react`, `@types/react-dom`,
+  `@vitejs/plugin-react`. (`vite` is already in the catalog.)
 
 Deliberately not added:
 
-- HTTP framework
+- HTTP framework other than Fastify
 - Router
 - State management library
 - UI kit
 - Markdown renderer
-- Validation library
 
 ---
 
 ## 13. Security and operational notes
 
-| Concern                                     | Handling                                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Remote exposure                             | Bind `127.0.0.1`; warn if `HOST` is not loopback                                                        |
-| Agent trust                                 | Agents run as the user; the app is not a sandbox                                                        |
-| File and terminal access                    | Owned by the agent. The backend advertises no `fs`/`terminal` capability and runs none of those methods |
-| Auth credentials                            | Owned by each CLI. The backend never reads, stores, forwards, or logs credentials                       |
-| Unsupported methods                         | Let the SDK answer `method-not-found`; log the method and preset id                                     |
-| Secret leakage                              | `GET /api/agents` strips `env`; never log preset env                                                    |
-| Large payloads                              | 16 MiB WS limit; 1 MiB JSON API body cap                                                                |
-| Orphan processes                            | Process-group kill, heartbeat, shutdown handlers                                                        |
-| Duplicate prompts                           | One in-flight prompt per chat                                                                           |
-| Pending permissions on cancel or disconnect | Resolve as `cancelled` before teardown                                                                  |
-| Project deletion                            | Remove the in-memory entry only; never touch the directory                                              |
-| Refresh / restart                           | Chats are lost; projects survive a page refresh but not a backend restart in v1                         |
+| Concern                                     | Handling                                                                                                  |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Remote exposure                             | Bind `127.0.0.1`; warn if `HOST` is not loopback                                                          |
+| Agent trust                                 | Agents run as the user; the app is not a sandbox                                                          |
+| File and terminal access                    | Owned by the agent. The backend advertises no `fs`/`terminal` capability and runs none of those methods   |
+| Auth credentials                            | Owned by each CLI. The backend never reads, stores, forwards, or logs credentials                         |
+| Unsupported methods                         | Let the SDK answer `method-not-found`; log the method and preset id                                       |
+| Secret leakage                              | `GET /api/agents` strips `env`; never log preset env                                                      |
+| Large payloads                              | `acp.DEFAULT_MAX_MESSAGE_BYTES` applied to the WS `maxPayload` and the NDJSON stream; 1 MiB JSON body cap |
+| Orphan processes                            | Fastify `onClose` teardown, process-group kill, heartbeat                                                 |
+| Duplicate prompts                           | One in-flight prompt per chat                                                                             |
+| Pending permissions on cancel or disconnect | Resolve as `cancelled` before teardown                                                                    |
+| Project deletion                            | Remove the in-memory entry only; never touch the directory                                                |
+| Refresh / restart                           | Chats are lost; projects survive a page refresh but not a backend restart in v1                           |
 
 ---
 
@@ -929,19 +1107,21 @@ Deliberately not added:
 | Windows process cleanup                         | Orphan agents                   | Use `taskkill /pid <pid> /T /F` as the Windows fallback                                                                   |
 | Long-running prompts                            | Memory growth in the browser    | Cap rendered items per chat (e.g., 2,000) or virtualize later                                                             |
 | WebSocket backpressure                          | Slow UI, memory growth          | Watch `bufferedAmount`; close misbehaving sockets in a later iteration                                                    |
+| UI work starts late                             | Protocol gaps found in M5       | M4 freezes the protocol and ships a `wscat` walkthrough; M5 consumes types from `@repo/protocol`                          |
 | No reconnect                                    | Work lost on refresh            | Accepted v1; add session persistence and `session/load` later                                                             |
 | In-memory projects and chats                    | Lost on backend restart         | Accepted v1; persist both to a database in a later version                                                                |
-| SDK changes                                     | Breakage on upgrade             | Pin the SDK version; rerun integration tests on upgrade                                                                   |
+| SDK changes                                     | Breakage on upgrade             | Pin the SDK version in the catalog; rerun integration tests on upgrade                                                    |
 
 ---
 
 ## 15. Open questions
 
-1. Should OpenCode, Codex, etc all ship as presets, or only the fake
-   agent plus a documented template?
+1. Should OpenCode, Codex, etc ship as presets, or only the fake agent plus a
+   documented template? (`config/agents.example.json` currently ships all three.)
 2. Should each project remember a default agent?
 3. Does v1 need a way to open the project directory or validate it from the UI beyond adding it?
-4. Is Vite dev-server-only acceptable for v1, or is a single `npm start` serving built assets required?
+4. Is a Vite-dev-server-only setup acceptable for v1, given static asset serving
+   is now the last hardening item and no longer blocks anything else?
 5. Should the backend expose a “force kill” action for a stuck chat, or is socket close enough?
 6. What is the expected behavior when the project directory is deleted while the backend runs?
 7. Is a generic `authenticate` step worth adding in v1.1, or should all auth
@@ -961,7 +1141,7 @@ Deliberately not added:
 ### Client-side handlers the backend implements
 
 - `session/update` (notification)
-- `session/request_permission`
+- `session/request_permission` (request)
 
 That is the complete client role for v1.
 
@@ -1004,6 +1184,34 @@ adapter calls them anyway.
 
 The UI treats every stop reason as “turn finished”; it only special-cases `cancelled` for the Stop button flow.
 
+### SDK API notes (`@agentclientprotocol/sdk` 2.1.0)
+
+The installed package ships protocol v1 on its stable entrypoint. These details
+differ from the v1 draft of this plan and from what older examples show:
+
+- **Named exports only, ESM only.** `import acp from "@agentclientprotocol/sdk"`
+  does not exist; use `import * as acp from "@agentclientprotocol/sdk"`.
+- **Handlers take one context object**, not `params`:
+  `({ method, params, signal, agent, requestId }) => result`. Return the result
+  directly; the SDK does not want an `{ outcome }` wrapper around request
+  results.
+- **`session/request_permission` response** is
+  `{ outcome: { outcome: "selected", optionId } }` or
+  `{ outcome: { outcome: "cancelled" } }`.
+- **`session/prompt`** takes `prompt: ContentBlock[]`, so pass
+  `[{ type: "text", text }]`.
+- **`session/new`** requires both `cwd` and `mcpServers`.
+- **`initialize`** requires `protocolVersion: acp.PROTOCOL_VERSION` (literal `1`).
+- **`session/cancel`** is a notification, not a request.
+- **`client(...).connect(stream)`** is synchronous and takes the
+  `ndJsonStream(...)` result. `ndJsonStream(output, input, { maxMessageBytes })`
+  is output-first.
+- **Fake agents:** `acp.agent({...})` rejects every request except `initialize`
+  with `-32600` until an initialize handler succeeds, and the SDK zod-validates
+  params before the handler runs.
+- **No example files ship in the package.** The client/ws/http examples exist
+  only in the GitHub repository linked below.
+
 ---
 
 ## 17. Documentation and resources
@@ -1013,12 +1221,15 @@ The UI treats every stop reason as “turn finished”; it only special-cases `c
 `README.md`
 
 - What this is: a local UI orchestrator, not an agent harness.
-- Requirements: Node.js 22+, npm, one or more agent CLIs installed.
+- Requirements: Node.js 24+, pnpm 12, one or more agent CLIs installed.
+- Workspace commands: `pnpm install`, `pnpm --filter @repo/server dev`,
+  `pnpm --filter @repo/web dev`, `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 - Quick start with the fake agent.
 - How to add a project and a chat.
 - Persistence: v1 keeps projects and chats in memory; restarting the backend
   clears them. Database persistence for both is planned.
-- How to configure `config/agents.json`.
+- How to configure `config/agents.json`, including `AGENTS_FILE` and the
+  repo-root rule for `./`-relative commands and arguments.
 - Login steps for real agents.
 - Security notes: loopback only, agents run as the user, no sandbox, CLI owns
   credentials.
@@ -1029,13 +1240,14 @@ The UI treats every stop reason as “turn finished”; it only special-cases `c
 `docs/protocol.md`
 
 - The four client messages and the server messages, copied from
-  `shared/src/protocol.ts`.
+  `apps/server/src/protocol.ts` (then `@repo/protocol` after M5).
 - One-chat-per-socket rule.
 - `start` timeout, close codes, payload limit, heartbeat.
 - Permission request/response correlation and the `optionId: null` cancel path.
 - Cancel semantics: open permissions become `cancelled` before `session/cancel`.
 - Error frame shape, including `authMethods`.
 - The fact that the browser never speaks ACP.
+- A frozen-protocol statement naming `@agentclientprotocol/sdk` 2.1.0.
 
 `docs/agent-presets.md`
 
@@ -1051,12 +1263,12 @@ The UI treats every stop reason as “turn finished”; it only special-cases `c
 
 ### Agent preset reference
 
-| Agent      | Command                                 | Notes                                               |
-| ---------- | --------------------------------------- | --------------------------------------------------- |
-| Fake       | `tsx server/fixtures/fake-agent.ts`     | No tokens, no network                               |
-| OpenCode   | `opencode acp`                          | Run `opencode auth login` first                     |
-| Codex      | `npx -y @agentclientprotocol/codex-acp` | Run `codex login` first; `@preview` exists          |
-| Gemini CLI | `gemini --acp`                          | Older flag: `--experimental-acp`; may need ACP auth |
+| Agent      | Command                                  | Notes                                               |
+| ---------- | ---------------------------------------- | --------------------------------------------------- |
+| Fake       | `tsx apps/server/fixtures/fake-agent.ts` | No tokens, no network                               |
+| OpenCode   | `opencode acp`                           | Run `opencode auth login` first                     |
+| Codex      | `npx -y @agentclientprotocol/codex-acp`  | Run `codex login` first; `@preview` exists          |
+| Gemini CLI | `gemini --acp`                           | Older flag: `--experimental-acp`; may need ACP auth |
 
 Verify the exact package names and flags against the linked docs before writing
 them into the README; adapters change.
