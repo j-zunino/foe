@@ -900,6 +900,8 @@ must not require protocol changes. If one does, that is a bug in M4.
 
 ### M0 — Server scaffold and config
 
+**Status: done.**
+
 Deliverables:
 
 - `lib/fastify.ts` `buildApp()` becomes the only app factory (`bodyLimit` 1 MiB, already the default);
@@ -913,6 +915,7 @@ Deliverables:
 Acceptance:
 
 - `pnpm install`
+- `cp config/agents.example.json config/agents.json` (gitignored; local presets)
 - `pnpm typecheck` and `pnpm lint`
 - `pnpm --filter @repo/server dev`, then
   `curl http://127.0.0.1:8787/api/health` returns `{ "ok": true }`.
