@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 
-async function healthRoutes(fastify: FastifyInstance) {
-    fastify.get("/", async () => {
+function healthRoutes(fastify: FastifyInstance) {
+    fastify.get("/", () => {
         return { ok: true };
     });
 }

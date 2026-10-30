@@ -18,13 +18,14 @@ export default defineConfig(
         files: ["**/*.{ts,tsx}"],
         languageOptions: {
             parserOptions: {
-                warnOnUnsupportedTypeScriptVersion: false,
+                projectService: true,
             },
         },
-    },
-    {
         rules: {
-            "@typescript-eslint/no-non-null-assertion": "off",
+            "@typescript-eslint/no-non-null-assertion": "error",
+            "@typescript-eslint/no-inferrable-types": "error",
+            "@typescript-eslint/no-unnecessary-type-assertion": "error",
+            "@typescript-eslint/require-await": "error",
         },
     },
     prettier,
