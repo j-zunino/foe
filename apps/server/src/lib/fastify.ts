@@ -10,12 +10,13 @@ declare module "fastify" {
 }
 
 function buildApp({ db, sqlite }: DatabaseHandle) {
-    const app = Fastify({ logger: true });
+    const app = Fastify({ logger: true, bodyLimit: 1024 * 1024 });
 
     app.decorate("db", db);
     app.decorate("sqlite", sqlite);
-    app.addHook("onClose", async () => {
-        sqlite.close();
+    app.addHook("onClose", (instance, done) => {
+        instance.sqlite.close();
+        done();
     });
 
     return app;

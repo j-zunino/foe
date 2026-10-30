@@ -25,7 +25,13 @@ fastify.log.info(
     "agent presets loaded",
 );
 
-// Routes
 fastify.register(routes, { prefix: "/api" });
 
 await fastify.listen({ host: config.HOST, port: config.PORT });
+
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.once(signal, async () => {
+        await fastify.close();
+        process.exit(0);
+    });
+}

@@ -24,15 +24,16 @@ export function createDatabase({ filename, migrationsDir }: DatabaseOptions) {
         }
 
         sqlite = new Database(filename);
+
+        // WAL for concurrent readers; busy_timeout so writers wait instead of failing.
+        sqlite.pragma("journal_mode = WAL");
+        sqlite.pragma("foreign_keys = ON");
+        sqlite.pragma("busy_timeout = 5000");
     } catch (error) {
         throw new Error(`Cannot open database at ${filename}`, {
             cause: error,
         });
     }
-
-    sqlite.pragma("journal_mode = WAL");
-    sqlite.pragma("foreign_keys = ON");
-    sqlite.pragma("busy_timeout = 5000");
 
     try {
         const db = drizzle(sqlite, { schema });
