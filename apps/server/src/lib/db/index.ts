@@ -25,7 +25,9 @@ export function createDatabase({ filename, migrationsDir }: DatabaseOptions) {
 
         sqlite = new Database(filename);
     } catch (error) {
-        throw new Error(`Cannot open database at ${filename}`, { cause: error });
+        throw new Error(`Cannot open database at ${filename}`, {
+            cause: error,
+        });
     }
 
     sqlite.pragma("journal_mode = WAL");

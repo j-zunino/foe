@@ -4,28 +4,28 @@ import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  {
-    ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/.turbo/**",
-      "**/coverage/**",
-    ],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parserOptions: {
-        warnOnUnsupportedTypeScriptVersion: false,
-      },
+    {
+        ignores: [
+            "**/dist/**",
+            "**/node_modules/**",
+            "**/.turbo/**",
+            "**/coverage/**",
+        ],
     },
-  },
-  {
-    rules: {
-      "@typescript-eslint/no-non-null-assertion": "off",
+    eslint.configs.recommended,
+    ...tseslint.configs.recommended,
+    {
+        files: ["**/*.{ts,tsx}"],
+        languageOptions: {
+            parserOptions: {
+                warnOnUnsupportedTypeScriptVersion: false,
+            },
+        },
     },
-  },
-  prettier,
+    {
+        rules: {
+            "@typescript-eslint/no-non-null-assertion": "off",
+        },
+    },
+    prettier,
 );
