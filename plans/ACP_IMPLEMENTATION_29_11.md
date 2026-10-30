@@ -902,7 +902,7 @@ must not require protocol changes. If one does, that is a bug in M4.
 
 Deliverables:
 
-- `lib/fastify.ts` `buildApp()` becomes the only app factory (`bodyLimit` 1 MiB);
+- `lib/fastify.ts` `buildApp()` becomes the only app factory (`bodyLimit` 1 MiB, already the default);
   `index.ts` uses it instead of constructing Fastify inline.
 - `config.ts`: `findRepoRoot()`, zod-validated `loadConfig()` (`HOST`, `PORT`,
   `AGENTS_FILE`) and `loadAgents()`.
