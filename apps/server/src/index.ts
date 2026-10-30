@@ -1,4 +1,5 @@
-import { loadAgents, loadConfig } from "./config.js";
+import { loadAgents } from "./config/agent.js";
+import { loadConfig } from "./config/env.js";
 import { buildApp } from "./lib/fastify.js";
 import { routes } from "./routes/index.js";
 
@@ -7,7 +8,12 @@ const agents = loadAgents(config.AGENTS_FILE);
 
 const fastify = buildApp();
 
-fastify.log.info({ agents: agents.map((agent) => agent.id) }, "agent presets loaded");
+fastify.log.info(
+    { agents: agents.map((agent) => agent.id) },
+    "agent presets loaded",
+);
+
+// Routes
 fastify.register(routes, { prefix: "/api" });
 
 await fastify.listen({ host: config.HOST, port: config.PORT });
