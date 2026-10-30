@@ -1,8 +1,8 @@
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { healthRoutes } from "./api/health.js";
 
-const routes: FastifyPluginAsync = async (fastify) => {
+async function routes(fastify: FastifyInstance) {
     fastify.register(healthRoutes, { prefix: "/health" });
-};
+}
 
 export { routes };

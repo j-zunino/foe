@@ -1,5 +1,7 @@
 import Fastify from "fastify";
 
-export function buildApp() {
+function buildApp() {
     return Fastify({ logger: true });
 }
+
+export { buildApp };
