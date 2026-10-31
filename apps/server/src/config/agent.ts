@@ -1,15 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { z } from "zod";
-
-const Preset = z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    command: z.string().min(1),
-    args: z.array(z.string()).default([]),
-    env: z.record(z.string(), z.string()).default({}),
-});
-
-type AgentPreset = z.infer<typeof Preset>;
+import { agentPresetsFileSchema, type AgentPreset } from "@repo/protocol";
 
 function loadAgents(file: string): AgentPreset[] {
     if (!existsSync(file)) {
@@ -27,7 +17,7 @@ function loadAgents(file: string): AgentPreset[] {
         });
     }
 
-    const result = z.object({ agents: z.array(Preset) }).safeParse(parsed);
+    const result = agentPresetsFileSchema.safeParse(parsed);
     if (!result.success) {
         throw new Error(
             `Invalid agent presets in ${file}: ${result.error.message}`,

@@ -11,6 +11,7 @@ catalog:
   zod: 4.6.7
   "@agentclientprotocol/sdk": 2.1.0
   fastify: 5.12.7
+  "@fastify/type-provider-zod": 1.0.3
   "@fastify/websocket": 11.3.4
   ws: 8.22.0
   "@types/ws": 8.18.2

@@ -17,13 +17,10 @@ const database = createDatabase({
 
 const fastify = buildApp(database);
 
-fastify.log.info(
-    {
-        agents: agents.map((agent) => agent.id),
-        database: config.DATABASE_FILE,
-    },
-    "agent presets loaded",
-);
+fastify.log.info({
+    agents: agents.map((agent) => agent.id),
+    database: config.DATABASE_FILE,
+});
 
 fastify.register(routes, { prefix: "/api" });
 
