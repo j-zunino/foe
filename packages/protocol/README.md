@@ -45,11 +45,7 @@ Routes then use `FastifyPluginAsyncZod` and get `request.body` / `request.query`
 
 ```ts
 import type { FastifyPluginAsyncZod } from "@fastify/type-provider-zod";
-import {
-    createProjectSchema,
-    createdProjectSchema,
-    errorResponseSchema,
-} from "@repo/protocol";
+import { createProjectSchema, createdProjectSchema } from "@repo/protocol";
 
 const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
     fastify.post(
@@ -59,7 +55,6 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
                 body: createProjectSchema,
                 response: {
                     201: createdProjectSchema,
-                    400: errorResponseSchema,
                 },
             },
         },
@@ -73,7 +68,7 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
 
 Route plugins are async by signature even when they only register routes; the shared ESLint config disables `require-await` for `**/routes/**/*.ts`.
 
-Schema validation failures are turned into `400 { error }` by the server's error handler. Handler-thrown errors keep Fastify's default handling.
+All error responses use the shared `{ statusCode, message }` shape. The server's error handler owns that contract: it normalizes validation failures, body-parse errors, and thrown errors. Routes declare only success responses and throw `httpError(statusCode, message)` for expected failures, so the typed provider permits only success codes in `reply.code(...)`. When no response schema matches the status, Fastify falls back to `JSON.stringify`, which sends the handler's object unchanged. `errorResponseSchema` stays exported for clients.
 
 Services take inferred types instead of re-declaring shapes:
 
