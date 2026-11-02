@@ -9,7 +9,9 @@ export {
     createProjectSchema,
     createdProjectSchema,
     projectSchema,
+    projectsSchema,
     type CreateProjectInput,
     type CreatedProject,
     type Project,
+    type Projects,
 } from "./projects.js";
