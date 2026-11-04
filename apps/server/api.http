@@ -39,3 +39,6 @@ Content-Type: application/json
 
 ### Delete project
 DELETE {{baseUrl}}/projects/{{projectId}}
+
+### Agents
+GET {{baseUrl}}/agents

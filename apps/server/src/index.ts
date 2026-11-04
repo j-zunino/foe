@@ -18,7 +18,7 @@ try {
         migrationsDir: resolve(root, "database/migrations"),
     });
 
-    fastify = buildApp(database);
+    fastify = buildApp({ ...database, agents });
 
     fastify.log.info({
         agents: agents.map((agent) => agent.id),

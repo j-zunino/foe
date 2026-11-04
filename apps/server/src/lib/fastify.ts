@@ -3,7 +3,7 @@ import {
     validatorCompiler,
     type ZodTypeProvider,
 } from "@fastify/type-provider-zod";
-import type { ErrorResponse } from "@repo/protocol";
+import type { AgentPreset, ErrorResponse } from "@repo/protocol";
 import Fastify, { type FastifyError } from "fastify";
 import type { AppDatabase, DatabaseHandle, Sqlite } from "./db/index.js";
 
@@ -11,10 +11,15 @@ declare module "fastify" {
     interface FastifyInstance {
         db: AppDatabase;
         sqlite: Sqlite;
+        agents: AgentPreset[];
     }
 }
 
-function buildApp({ db, sqlite }: DatabaseHandle) {
+function buildApp({
+    db,
+    sqlite,
+    agents,
+}: DatabaseHandle & { agents: AgentPreset[] }) {
     const fastify = Fastify({ logger: true, bodyLimit: 1024 * 1024 })
         .setValidatorCompiler(validatorCompiler)
         .setSerializerCompiler(serializerCompiler)
@@ -53,6 +58,7 @@ function buildApp({ db, sqlite }: DatabaseHandle) {
 
     fastify.decorate("db", db);
     fastify.decorate("sqlite", sqlite);
+    fastify.decorate("agents", agents);
     fastify.addHook("onClose", (instance, done) => {
         instance.sqlite.close();
         done();
