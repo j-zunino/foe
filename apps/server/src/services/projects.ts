@@ -1,9 +1,9 @@
-import type { CreateProjectInput } from "@repo/protocol";
+import type { CreateProjectInput, Project } from "@repo/protocol";
 import { randomUUID } from "crypto";
+import { asc, eq } from "drizzle-orm/sqlite-core/expressions";
 import type { AppDatabase } from "../lib/db/index.js";
 import { projects as projectsTable } from "../lib/db/schema.js";
 import { httpError } from "../lib/http-error.js";
-import { asc } from "drizzle-orm/sqlite-core/expressions";
 
 const projects = {
     async list(db: AppDatabase) {
@@ -14,7 +14,14 @@ const projects = {
             .limit(10);
     },
 
-    async create(db: AppDatabase, input: CreateProjectInput) {
+    async get(db: AppDatabase, id: Project["id"]) {
+        return db
+            .select()
+            .from(projectsTable)
+            .where(eq(projectsTable.id, id))
+            .get();
+    },
+
     async add(db: AppDatabase, input: CreateProjectInput) {
         const [project] = await db
             .insert(projectsTable)

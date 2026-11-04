@@ -5,6 +5,7 @@ import {
     projectsSchema,
 } from "@repo/protocol";
 import { basename } from "node:path";
+import { httpError } from "../../lib/http-error.js";
 import { resolveDirectory } from "../../lib/paths.js";
 import { projects } from "../../services/projects.js";
 
@@ -16,6 +17,27 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
         },
         async (_request, reply) => {
             const res = await projects.list(fastify.db);
+
+            return reply.code(200).send(res);
+        },
+    );
+
+    fastify.get(
+        "/:id",
+        {
+            schema: {
+                params: projectSchema.pick({ id: true }),
+                response: { 200: projectSchema },
+            },
+        },
+        async (request, reply) => {
+            const { id } = request.params;
+
+            const res = await projects.get(fastify.db, id);
+
+            if (!res) {
+                throw httpError(404, "project not found");
+            }
 
             return reply.code(200).send(res);
         },
