@@ -6,15 +6,19 @@ GET {{baseUrl}}/health
 ### List projects
 GET {{baseUrl}}/projects
 
-### Create project
+### Get project by id
+GET {{baseUrl}}/projects/{{projectId}}
+
+### Add project
 POST {{baseUrl}}/projects HTTP/1.1
 Content-Type: application/json
 
 {
   "name": "Test",
-  "path": "/home/juan" }
+  "path": "/home/juan"
+}
 
-### Create project (error)
+### Add project (error)
 POST {{baseUrl}}/projects HTTP/1.1
 Content-Type: application/json
 

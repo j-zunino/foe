@@ -15,6 +15,7 @@ const projects = {
     },
 
     async create(db: AppDatabase, input: CreateProjectInput) {
+    async add(db: AppDatabase, input: CreateProjectInput) {
         const [project] = await db
             .insert(projectsTable)
             .values({

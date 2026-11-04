@@ -15,9 +15,9 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
             schema: { response: { 200: projectsSchema } },
         },
         async (_request, reply) => {
-            const list = await projects.list(fastify.db);
+            const res = await projects.list(fastify.db);
 
-            return reply.code(200).send(list);
+            return reply.code(200).send(res);
         },
     );
 
@@ -33,12 +33,12 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
             const { path, name } = request.body;
             const canonical = await resolveDirectory(path);
 
-            const project = await projects.create(fastify.db, {
+            const res = await projects.add(fastify.db, {
                 name: name ?? basename(canonical),
                 path: canonical,
             });
 
-            return reply.code(201).send(project);
+            return reply.code(201).send(res);
         },
     );
 };
