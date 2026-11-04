@@ -1,6 +1,6 @@
 # M1.07 — Route registration and decorators
 
-Status: todo
+Status: done
 Milestone: [M1](README.md)
 Refs: [Bootstrap](../reference/backend.md#bootstrap)
 
@@ -17,12 +17,12 @@ Wire the project store and presets into the app and register the REST routes.
 ## Tasks
 
 - [x] Decorate `agents` with the resolved presets
-- [ ] Augment the Fastify types for both decorators (`agents` done in M1.06)
+- [x] Augment the Fastify types for both decorators (`agents` done in M1.06)
 - [x] Register `agentsRoutes` at `/agents`
 - [x] Pass presets into `buildApp`
 
 ## Done when
 
-- [ ] Typecheck passes
-- [ ] `curl /api/agents` respond
-- [ ] Integration tests can build the app with fake presets
+- [x] Typecheck passes
+- [x] `curl /api/agents` respond
+- [x] Integration tests can build the app with fake presets
