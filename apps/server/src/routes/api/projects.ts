@@ -63,6 +63,27 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
             return reply.code(201).send(res);
         },
     );
+
+    fastify.delete(
+        "/:id",
+        {
+            schema: {
+                params: projectSchema.pick({ id: true }),
+                response: { 200: projectSchema },
+            },
+        },
+        async (request, reply) => {
+            const { id } = request.params;
+
+            const res = await projects.remove(fastify.db, id);
+
+            if (!res) {
+                throw httpError(404, "project not found");
+            }
+
+            return reply.code(200).send(res);
+        },
+    );
 };
 
 export { projectsRoutes };

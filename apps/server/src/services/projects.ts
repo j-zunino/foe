@@ -39,6 +39,15 @@ const projects = {
 
         return project;
     },
+
+    async remove(db: AppDatabase, id: Project["id"]) {
+        const [project] = await db
+            .delete(projectsTable)
+            .where(eq(projectsTable.id, id))
+            .returning();
+
+        return project;
+    },
 };
 
 export { projects };

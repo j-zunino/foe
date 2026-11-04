@@ -36,3 +36,6 @@ Content-Type: application/json
   "name": "Test again",
   "path": "/home/juan"
 }
+
+### Delete project
+DELETE {{baseUrl}}/projects/{{projectId}}
