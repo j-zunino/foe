@@ -45,7 +45,7 @@ Routes then use `FastifyPluginAsyncZod` and get `request.body` / `request.query`
 
 ```ts
 import type { FastifyPluginAsyncZod } from "@fastify/type-provider-zod";
-import { createProjectSchema, createdProjectSchema } from "@repo/protocol";
+import { createProjectSchema, projectSchema } from "@repo/protocol";
 
 const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
     fastify.post(
@@ -54,13 +54,13 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
             schema: {
                 body: createProjectSchema,
                 response: {
-                    201: createdProjectSchema,
+                    201: projectSchema,
                 },
             },
         },
         async (request, reply) => {
             // request.body: CreateProjectInput
-            return reply.code(201).send({ ...project, available: true });
+            return reply.code(201).send(project);
         },
     );
 };

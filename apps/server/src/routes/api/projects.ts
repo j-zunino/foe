@@ -33,7 +33,7 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
         async (request, reply) => {
             const { id } = request.params;
 
-            const res = await projects.get(fastify.db, id);
+            const res = projects.get(fastify.db, id);
 
             if (!res) {
                 throw httpError(404, "project not found");
@@ -69,7 +69,6 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
         {
             schema: {
                 params: projectSchema.pick({ id: true }),
-                response: { 200: projectSchema },
             },
         },
         async (request, reply) => {
@@ -81,7 +80,7 @@ const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
                 throw httpError(404, "project not found");
             }
 
-            return reply.code(200).send(res);
+            return reply.code(204).send();
         },
     );
 };

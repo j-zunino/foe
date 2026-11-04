@@ -10,11 +10,10 @@ const projects = {
         return db
             .select()
             .from(projectsTable)
-            .orderBy(asc(projectsTable.createdAt))
-            .limit(10);
+            .orderBy(asc(projectsTable.createdAt), asc(projectsTable.id));
     },
 
-    async get(db: AppDatabase, id: Project["id"]) {
+    get(db: AppDatabase, id: Project["id"]) {
         return db
             .select()
             .from(projectsTable)
@@ -22,7 +21,7 @@ const projects = {
             .get();
     },
 
-    async add(db: AppDatabase, input: CreateProjectInput) {
+    async add(db: AppDatabase, input: CreateProjectInput & { name: string }) {
         const [project] = await db
             .insert(projectsTable)
             .values({
