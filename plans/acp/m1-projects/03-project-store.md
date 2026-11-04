@@ -1,29 +1,30 @@
 # M1.03 — Project store
 
-Status: todo
+Status: done
 Milestone: [M1](README.md)
 Refs: [Project store](../reference/backend.md#project-store), [Protocol](../reference/protocol.md#rest-api)
 
 ## Goal
 
-A DB-backed project store with canonical paths and availability computed at read time.
+A DB-backed project store with canonical paths and directory validation at write time.
 
 ## Changes
 
-- `apps/server/src/lib/projects.ts` (new)
+- `apps/server/src/services/projects.ts` (new)
 
 ## Tasks
 
-- [ ] Derive `Project` from the Drizzle schema
-- [ ] Export `createProjectStore(db)` with `list`, `get`, `add`, `remove`
-- [ ] `list` orders by `created_at`, `id` and computes `available` from the directory
-- [ ] `add` canonicalizes with `fs.realpath`, defaults `name` to `basename(path)`, and uses `returning()`
-- [ ] Map the `path` unique violation to a duplicate error for `409`
-- [ ] `remove` deletes by id and reports whether a row was removed
-- [ ] Keep no in-memory cache; SQLite is the source of truth
+- [x] `Project` comes from the protocol schema; the store returns Drizzle rows matching it
+- [x] Export a plain `projects` service: `list`, `get`, `add`, `remove`, each taking `db`
+- [x] `list` orders by `created_at, id` (no limit)
+- [x] Route canonicalizes with `fs.realpath` (via `resolveDirectory`) and defaults `name` to `basename(path)`
+- [x] `add` uses `insert(...).onConflictDoNothing().returning()`; a missing row is a duplicate (`409`)
+- [x] `remove` deletes by id and returns the removed row; the route answers `204` or `404`
+- [x] Keep no in-memory cache; SQLite is the source of truth
+- [x] Do not store or compute availability; directory existence is checked at use time
 
 ## Done when
 
-- [ ] Typecheck passes
-- [ ] The store matches the reference behavior
+- [x] Typecheck passes
+- [x] The store matches the reference behavior
 - [ ] Unit tests in M1.08 pass

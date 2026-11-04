@@ -14,7 +14,7 @@ List, add, and delete projects over REST.
 
 ## Tasks
 
-- [ ] `GET /` returns the project list with `available`
+- [ ] `GET /` returns the project list
 - [ ] `POST /` validates `{ path, name? }` with zod
 - [ ] Require an absolute path that exists and is a directory
 - [ ] Trim a provided name; default to `basename(path)` when omitted
@@ -22,7 +22,7 @@ List, add, and delete projects over REST.
 - [ ] Return `400` for invalid bodies, `409` for duplicates
 - [ ] `DELETE /:id` returns `204` or `404`
 - [ ] Delete only the row, never the directory
-- [ ] Use `fastify.projects`, not a store argument
+- [ ] Call the `projects` service with `fastify.db`
 
 ## Done when
 

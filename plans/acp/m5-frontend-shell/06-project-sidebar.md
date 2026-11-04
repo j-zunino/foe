@@ -19,7 +19,6 @@ Add, select, and remove projects from the UI.
 - [ ] Add-project form with an absolute path and optional name
 - [ ] Default the name to the directory basename on the server
 - [ ] Remove button with confirmation
-- [ ] Unavailable badge for missing directories
 - [ ] Select a project for the chat list
 
 ## Done when

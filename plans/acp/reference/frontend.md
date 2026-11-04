@@ -83,7 +83,7 @@ Slash commands:
 
 ## Components
 
-- `ProjectSidebar`: project list, add-project form (absolute path, optional name defaulting to the directory basename), remove button, unavailable badge.
+- `ProjectSidebar`: project list, add-project form (absolute path, optional name defaulting to the directory basename), remove button.
 - `ChatList`: chats for the selected project, new-chat button with agent picker defaulting to the first preset, running indicator.
 - `ChatView`: scrollable update list; auto-scroll unless the user scrolled up; error banner; status line.
 - `PromptInput`: textarea, Enter to send (Shift+Enter newline), disabled while running; Stop button.

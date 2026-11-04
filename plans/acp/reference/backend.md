@@ -13,7 +13,7 @@ export function buildApp({ db, sqlite }: DatabaseHandle) {
 }
 ```
 
-M1 adds `app.decorate("projects", createProjectStore(db))`; M2 adds `app.decorate("agents", presets)`. Augment Fastify instance types next to the decorators.
+M1 adds the `projects` service (imported directly by routes); M2 adds `agents` presets. Augment Fastify instance types next to any decorators you add.
 
 `index.ts` then:
 
@@ -117,25 +117,29 @@ export function createDatabase({ filename, migrationsDir }) {
 ## Project store
 
 ```ts
-export interface Project {
-    id: string;
-    name: string;
-    path: string; // canonical absolute path
-}
-
-export function createProjectStore(db: Db) {
-    return { list, get, add, remove };
-}
+// services/projects.ts — plain object, every method takes the database handle
+export const projects = { list, get, add, remove };
 ```
 
-- Decorated as `fastify.projects`; route modules use the decorator.
-- Build Drizzle statements once in `createProjectStore`, not per request.
+- Imported by route modules; no `fastify.projects` decorator and no closure. Each
+  method takes `AppDatabase` as its first argument, so tests construct a database and
+  call the service directly.
+- Drizzle statements are built per call. Statements are cheap to construct and SQLite
+  is synchronous; do not cache them.
 - IDs are `crypto.randomUUID()`.
-- `list`: `select().from(projects).orderBy(projects.createdAt, projects.id)`. Compute `available` at read time with a directory check; never store it.
-- `add`: canonicalize the path, `insert(...).returning()`. Map `SQLITE_CONSTRAINT_UNIQUE` for `path` to a duplicate error (`409`).
-- `remove`: delete by id; the affected-row count decides `204` versus `404`.
+- `list`: `select().from(projects).orderBy(projects.createdAt, projects.id)`. No limit, no availability computation.
+- `get`: returns the row, or `undefined` when the id is unknown.
+- `add`: the route canonicalizes the path and defaults the name, then calls
+  `insert(...).values(...).onConflictDoNothing().returning()`. A missing returned row
+  means the `path` unique constraint fired, so throw `409 project already exists`.
+- `remove`: `delete(...).where(eq(id)).returning()`; the route returns `204` when a row
+  was removed and `404` otherwise.
 - Deleting a project removes the row only. It never deletes the directory.
-- No in-memory cache. SQLite is the source of truth. A missing directory is reported `available: false`, not removed.
+- No in-memory cache. SQLite is the source of truth.
+- Do not store or compute an `available` flag. A directory can disappear at any moment,
+  so a read-time snapshot is stale immediately. Validate the directory at the point of
+  use instead: `resolveDirectory` on `POST /api/projects`, and the chat handler checks
+  `project.path` before spawning an agent (M3).
 
 Future persistence: chats and sessions move into the same database in separate tables, via a schema change plus a generated migration. Keep stable IDs and do not change the WebSocket protocol.
 

@@ -22,7 +22,6 @@ Cover the database, project store, routes, and preset resolution.
 - [ ] Project add/list/delete; name default and trim
 - [ ] Relative, missing, and non-directory paths are rejected
 - [ ] Duplicate canonical paths are rejected
-- [ ] A missing project directory reports `available: false` and stays in the list
 - [ ] Reopening a temp DB returns the same ids with no duplicates
 - [ ] Route inject tests cover `400`, `409`, `404`, `201`, `204`
 - [ ] Preset resolution and env stripping are tested

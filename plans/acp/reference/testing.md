@@ -17,7 +17,6 @@ The backend is fully tested before any UI exists. Frontend work in M5–M7 is ve
 - `name` defaults to `basename(path)` when omitted; a provided name is trimmed.
 - Relative, nonexistent, and non-directory paths are rejected.
 - Duplicate canonical paths are rejected by the `UNIQUE` constraint.
-- A project whose directory disappears is reported as `available: false` but is not removed.
 - Reopening the same temporary database file returns the same ids and no duplicates.
 
 `apps/server/src/routes/api/projects.test.ts`:

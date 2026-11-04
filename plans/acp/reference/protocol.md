@@ -10,7 +10,7 @@ Routes live under `apps/server/src/routes/api/` and are registered at `/api`. Re
 | -------- | ------------------- | --------------------- | ----------------------------------------- |
 | `GET`    | `/api/health`       | —                     | `{ "ok": true }`                          |
 | `GET`    | `/api/agents`       | —                     | `[{ "id", "name" }]`                      |
-| `GET`    | `/api/projects`     | —                     | `[{ "id", "name", "path", "available" }]` |
+| `GET`    | `/api/projects`     | —                     | `[{ "id", "name", "path", "createdAt" }]` |
 | `POST`   | `/api/projects`     | `{ "path", "name"? }` | `201` project item                        |
 | `DELETE` | `/api/projects/:id` | —                     | `204`                                     |
 
@@ -22,7 +22,7 @@ Validation:
 - Store the canonical path (`fs.realpath`) to avoid symlink ambiguity.
 - Reject duplicates by canonical path with `409`. The authority is the `UNIQUE` constraint on `projects.path`, not a read-then-write check.
 - Project ids are UUIDs stored in SQLite and stay stable across restarts.
-- `POST` returns the same object as a list item, `available` included.
+- `POST` returns the same object as a list item.
 - `GET /api/agents` returns only `id` and `name`. Never return `env` values.
 - Fastify `bodyLimit` is set once in `buildApp` (1 MiB).
 
