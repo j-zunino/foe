@@ -1,7 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { agentPresetsFileSchema, type AgentPreset } from "@repo/protocol";
+import { getRepoRoot } from "../lib/paths.js";
 
-function loadAgents(file: string): AgentPreset[] {
+// `./` paths are relative to the repo root; turbo runs with the package dir as cwd.
+function loadAgents(file: string, root = getRepoRoot()): AgentPreset[] {
     if (!existsSync(file)) {
         throw new Error(
             `Agent presets file not found: ${file} (copy config/agents.example.json)`,
@@ -31,7 +34,14 @@ function loadAgents(file: string): AgentPreset[] {
         ids.add(agent.id);
     }
 
-    return result.data.agents;
+    const resolveFromRoot = (value: string) =>
+        value.startsWith("./") ? resolve(root, value) : value;
+
+    return result.data.agents.map((agent) => ({
+        ...agent,
+        command: resolveFromRoot(agent.command),
+        args: agent.args.map(resolveFromRoot),
+    }));
 }
 
 export { loadAgents, type AgentPreset };

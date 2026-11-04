@@ -11,7 +11,7 @@ let fastify: ReturnType<typeof buildApp> | undefined;
 try {
     const root = getRepoRoot();
     const config = loadConfig();
-    const agents = loadAgents(config.AGENTS_FILE);
+    const agents = loadAgents(config.AGENTS_FILE, root);
 
     const database = createDatabase({
         filename: config.DATABASE_FILE,
