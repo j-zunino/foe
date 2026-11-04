@@ -1,6 +1,6 @@
 # M1.06 — Agents route
 
-Status: todo
+Status: done
 Milestone: [M1](README.md)
 Refs: [REST API](../reference/protocol.md#rest-api)
 
@@ -14,12 +14,12 @@ Expose agent presets as `{ id, name }` without leaking env.
 
 ## Tasks
 
-- [ ] `GET /` reads `fastify.agents`
-- [ ] Map each preset to `{ id, name }`
-- [ ] Never serialize the decorated preset array directly
-- [ ] Add a test asserting `env` is absent
+- [x] `GET /` reads `fastify.agents`
+- [x] Map each preset to `{ id, name }`
+- [x] Never serialize the decorated preset array directly
+- [x] Add a test asserting `env` is absent
 
 ## Done when
 
-- [ ] Typecheck passes
-- [ ] `GET /api/agents` returns only `id` and `name`
+- [x] Typecheck passes
+- [x] `GET /api/agents` returns only `id` and `name`

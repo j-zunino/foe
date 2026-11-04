@@ -14,8 +14,8 @@ Projects persist in SQLite, are exposed over REST, and agent presets are resolve
 - [x] [M1.02 Fastify DB decorators](02-fastify-db-decorators.md)
 - [x] [M1.03 Project store](03-project-store.md)
 - [x] [M1.04 Agent preset resolution](04-agent-preset-resolution.md)
-- [ ] [M1.05 Projects routes](05-projects-routes.md)
-- [ ] [M1.06 Agents route](06-agents-route.md)
+- [x] [M1.05 Projects routes](05-projects-routes.md)
+- [x] [M1.06 Agents route](06-agents-route.md)
 - [ ] [M1.07 Route registration](07-route-registration.md)
 - [ ] [M1.08 Tests](08-tests.md)
 

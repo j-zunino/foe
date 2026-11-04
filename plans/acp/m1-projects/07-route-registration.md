@@ -16,15 +16,13 @@ Wire the project store and presets into the app and register the REST routes.
 
 ## Tasks
 
-- [ ] Decorate `projects` with `createProjectStore(db)`
-- [ ] Decorate `agents` with the resolved presets
-- [ ] Augment the Fastify types for both decorators
-- [ ] Register `projectsRoutes` at `/projects`
-- [ ] Register `agentsRoutes` at `/agents`
-- [ ] Pass presets into `buildApp`
+- [x] Decorate `agents` with the resolved presets
+- [ ] Augment the Fastify types for both decorators (`agents` done in M1.06)
+- [x] Register `agentsRoutes` at `/agents`
+- [x] Pass presets into `buildApp`
 
 ## Done when
 
 - [ ] Typecheck passes
-- [ ] `curl /api/projects` and `/api/agents` respond
+- [ ] `curl /api/agents` respond
 - [ ] Integration tests can build the app with fake presets
