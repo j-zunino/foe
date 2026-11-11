@@ -1,6 +1,6 @@
 # M2 — Agent process and ACP client
 
-Status: todo
+Status: in progress
 Depends on: M1
 Refs: [Backend](../reference/backend.md#agent-process), [ACP notes](../reference/acp-notes.md), [Testing](../reference/testing.md#fake-agent)
 
@@ -10,7 +10,7 @@ Spawn one ACP agent per chat, initialize it, create a session, and expose prompt
 
 ## Steps
 
-- [ ] [M2.01 Fake agent](01-fake-agent.md)
+- [x] [M2.01 Fake agent](01-fake-agent.md)
 - [ ] [M2.02 Spawn and initialize](02-spawn-and-init.md)
 - [ ] [M2.03 Prompt, cancel, permissions](03-prompt-cancel-permissions.md)
 - [ ] [M2.04 Script-level test](04-script-test.md)
