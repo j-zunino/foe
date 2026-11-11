@@ -1,6 +1,6 @@
 import type { CreateProjectInput, Project } from "@repo/protocol";
-import { randomUUID } from "crypto";
-import { asc, eq } from "drizzle-orm/sqlite-core/expressions";
+import { asc, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import type { AppDatabase } from "../lib/db/index.js";
 import { projects as projectsTable } from "../lib/db/schema.js";
 import { httpError } from "../lib/http-error.js";
