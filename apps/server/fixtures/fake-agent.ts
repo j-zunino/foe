@@ -180,7 +180,7 @@ acp.agent({ name: "fake" })
         if (REQUIRE_AUTH) {
             throw acp.RequestError.authRequired();
         }
-        return { sessionId: `fake-s${++sessionCount}` };
+        return { sessionId: `fake-${process.pid}-s${++sessionCount}` };
     })
     .onRequest(acp.methods.agent.session.prompt, async ({ params, client }) => {
         prompts.get(params.sessionId)?.abort();
