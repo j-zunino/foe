@@ -5,6 +5,7 @@ import {
 } from "@fastify/type-provider-zod";
 import type { AgentPreset, ErrorResponse } from "@repo/protocol";
 import Fastify, { type FastifyError } from "fastify";
+import { closeAllChats } from "./chat.js";
 import type { AppDatabase, DatabaseHandle, Sqlite } from "./db/index.js";
 
 declare module "fastify" {
@@ -59,9 +60,9 @@ function buildApp({
     fastify.decorate("db", db);
     fastify.decorate("sqlite", sqlite);
     fastify.decorate("agents", agents);
-    fastify.addHook("onClose", (instance, done) => {
+    fastify.addHook("onClose", async (instance) => {
+        await closeAllChats();
         instance.sqlite.close();
-        done();
     });
 
     return fastify;

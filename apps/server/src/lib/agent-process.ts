@@ -32,7 +32,11 @@ class AgentStartError extends Error {
 interface AgentProcessOptions {
     preset: AgentPreset;
     cwd: string;
+    // Aborting kills the child and rejects an in-flight initialize/session/new.
+    signal?: AbortSignal;
     onUpdate: (update: acp.SessionUpdate) => void;
+    // Unexpected child exit; intentional close() does not fire it.
+    onExit?: (stderr: string) => void;
     // Returns the user's answer; cancel() and close() settle it as cancelled.
     requestPermission: (
         requestId: acp.JsonRpcId,
@@ -53,7 +57,9 @@ interface AgentProcess {
 async function startAgentProcess({
     preset,
     cwd,
+    signal,
     onUpdate,
+    onExit,
     requestPermission,
 }: AgentProcessOptions): Promise<AgentProcess> {
     const child = spawn(preset.command, preset.args, {
@@ -184,6 +190,13 @@ async function startAgentProcess({
         await exited;
         clearTimeout(timer);
     };
+
+    child.once("exit", () => {
+        if (!closing) onExit?.(stderrTail());
+    });
+
+    signal?.addEventListener("abort", () => void close(), { once: true });
+    if (signal?.aborted) void close();
 
     let init: acp.InitializeResponse;
     try {
