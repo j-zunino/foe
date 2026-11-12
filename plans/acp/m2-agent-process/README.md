@@ -12,7 +12,7 @@ Spawn one ACP agent per chat, initialize it, create a session, and expose prompt
 
 - [x] [M2.01 Fake agent](01-fake-agent.md)
 - [x] [M2.02 Spawn and initialize](02-spawn-and-init.md)
-- [ ] [M2.03 Prompt, cancel, permissions](03-prompt-cancel-permissions.md)
+- [x] [M2.03 Prompt, cancel, permissions](03-prompt-cancel-permissions.md)
 - [ ] [M2.04 Script-level test](04-script-test.md)
 
 ## Milestone done when
