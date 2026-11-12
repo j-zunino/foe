@@ -68,7 +68,7 @@ const app = acp
     .onRequest(acp.methods.agent.initialize, () => ({
         protocolVersion: acp.PROTOCOL_VERSION,
     }))
-    .onRequest(acp.methods.agent.session.new, () => ({ sessionId: "fake-s1" }))
+    .onRequest(acp.methods.agent.session.new, () => ({ sessionId: `fake-${process.pid}-s${++sessionCount}` }))
     .onRequest(acp.methods.agent.session.prompt, ({ params, client }) =>
         runPrompt(params, client),
     )
