@@ -1,6 +1,6 @@
 # M3.02 — Chat handler
 
-Status: todo
+Status: done
 Milestone: [M3](README.md)
 Refs: [Chat handler](../reference/backend.md#chat-handler)
 
@@ -11,24 +11,26 @@ One socket owns one chat, one agent process, and one ACP session.
 ## Changes
 
 - `apps/server/src/lib/chat.ts` (new)
+- `apps/server/src/lib/agent-process.ts` (`onExit` and `signal` options)
+- `apps/server/src/lib/fastify.ts` (teardown in `onClose`)
 
 ## Tasks
 
-- [ ] Add the `Chat` interface and module-level `chats` map
-- [ ] Enforce `start` within 10 seconds
-- [ ] Resolve project and preset; fail with an `error` frame when missing
-- [ ] Spawn, initialize, create a session, register the chat, and send `ready`
-- [ ] Reject `prompt` while running; send `prompt_done` or `error`
-- [ ] Track pending permissions by request id
-- [ ] Resolve permissions as cancelled on `cancel`, then forward `session/cancel`
-- [ ] On close/error: cancel permissions, tear down, clear timers, remove the chat
-- [ ] On agent exit: send `closed` with the stderr tail and close the socket
-- [ ] On auth failure: send `error` with `authMethods` and close
-- [ ] Tear down every chat on app shutdown
-- [ ] Guard the close-during-initialize race
+- [x] Add the `Chat` interface and module-level `chats` map
+- [x] Enforce `start` within 10 seconds
+- [x] Resolve project and preset; fail with an `error` frame when missing
+- [x] Spawn, initialize, create a session, register the chat, and send `ready`
+- [x] Reject `prompt` while running; send `prompt_done` or `error`
+- [x] Track pending permissions by request id
+- [x] Resolve permissions as cancelled on `cancel`, then forward `session/cancel`
+- [x] On close/error: cancel permissions, tear down, clear timers, remove the chat
+- [x] On agent exit: send `closed` with the stderr tail and close the socket
+- [x] On auth failure: send `error` with `authMethods` and close
+- [x] Tear down every chat on app shutdown
+- [x] Guard the close-during-initialize race
 
 ## Done when
 
-- [ ] Typecheck passes
+- [x] Typecheck passes
 - [ ] Integration tests in M3.04 pass
-- [ ] A chat cannot leak its agent process on disconnect
+- [x] A chat cannot leak its agent process on disconnect
