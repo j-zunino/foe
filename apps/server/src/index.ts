@@ -7,6 +7,8 @@ import { getRepoRoot } from "./lib/paths.js";
 
 let fastify: ReturnType<typeof buildApp> | undefined;
 
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost"]);
+
 try {
     const root = getRepoRoot();
     const config = loadConfig();
@@ -19,10 +21,24 @@ try {
 
     fastify = buildApp({ ...database, agents });
 
-    fastify.log.info({
-        agents: agents.map((agent) => agent.id),
-        database: config.DATABASE_FILE,
-    });
+    // Preset env values never reach the log: ids only.
+    fastify.log.info(
+        {
+            host: config.HOST,
+            port: config.PORT,
+            agentsFile: config.AGENTS_FILE,
+            databaseFile: config.DATABASE_FILE,
+            agents: agents.map((agent) => agent.id),
+        },
+        "starting",
+    );
+
+    if (!LOOPBACK_HOSTS.has(config.HOST)) {
+        fastify.log.warn(
+            { host: config.HOST },
+            "HOST is not loopback: the server is reachable from other machines",
+        );
+    }
 
     await fastify.listen({ host: config.HOST, port: config.PORT });
 } catch (error) {
