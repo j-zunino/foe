@@ -15,6 +15,7 @@
         "lint": "eslint ."
     },
     "dependencies": {
+        "@agentclientprotocol/sdk": "catalog:",
         "zod": "catalog:"
     },
     "devDependencies": {

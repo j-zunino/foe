@@ -17,3 +17,9 @@ export {
     type Project,
     type Projects,
 } from "./projects.js";
+export {
+    clientMessageSchema,
+    type AuthMethodSummary,
+    type ClientMessage,
+    type ServerMessage,
+} from "./ws.js";

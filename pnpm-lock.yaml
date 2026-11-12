@@ -335,6 +335,9 @@ importers:
 
   packages/protocol:
     dependencies:
+      '@agentclientprotocol/sdk':
+        specifier: 'catalog:'
+        version: 2.1.0(zod@4.6.7)
       zod:
         specifier: 'catalog:'
         version: 4.6.7
