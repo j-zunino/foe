@@ -283,6 +283,28 @@ describe("chat websocket", () => {
         },
     );
 
+    it.skipIf(process.platform === "win32")(
+        "kills a running agent when the socket closes mid-prompt",
+        async () => {
+            const marker = `foe-marker-${randomUUID()}`;
+            const { url, projectId } = await setup([
+                { ...preset, args: [...preset.args, marker] },
+            ]);
+            const client = await connect(url);
+            await startChat(client, projectId);
+
+            client.send({ type: "prompt", text: "slow" });
+            await waitFor(client.frames, "update", (frame) =>
+                JSON.stringify(frame).includes("tick"),
+            );
+            expect(countProcesses(marker)).toBeGreaterThan(0);
+
+            client.ws.close();
+
+            await waitUntil(() => countProcesses(marker) === 0);
+        },
+    );
+
     it("closes invalid messages with 4001 and a missing start with 4000", async () => {
         const { url } = await setup();
 

@@ -97,6 +97,7 @@ async function startAgentProcess({
     const stream = acp.ndJsonStream(
         Writable.toWeb(stdin),
         Readable.toWeb(stdout) as ReadableStream<Uint8Array>,
+        { maxMessageBytes: acp.DEFAULT_MAX_MESSAGE_BYTES },
     );
 
     let sessionId: string | undefined = undefined;
