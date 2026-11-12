@@ -33,7 +33,9 @@ interface AgentProcessOptions {
     preset: AgentPreset;
     cwd: string;
     onUpdate: (update: acp.SessionUpdate) => void;
+    // Returns the user's answer; cancel() and close() settle it as cancelled.
     requestPermission: (
+        requestId: acp.JsonRpcId,
         params: acp.RequestPermissionRequest,
     ) => Promise<acp.RequestPermissionResponse>;
 }
@@ -95,6 +97,28 @@ async function startAgentProcess({
 
     let sessionId: string | undefined = undefined;
 
+    // Inbound permission requests awaiting a user answer, keyed by JSON-RPC id.
+    const permissions = new Map<
+        acp.JsonRpcId,
+        (response: acp.RequestPermissionResponse) => void
+    >();
+
+    const settlePermission = (
+        requestId: acp.JsonRpcId,
+        response: acp.RequestPermissionResponse,
+    ) => {
+        const settle = permissions.get(requestId);
+        if (!settle) return; // already answered, cancelled, or never ours
+        permissions.delete(requestId);
+        settle(response);
+    };
+
+    const cancelPermissions = () => {
+        for (const requestId of [...permissions.keys()]) {
+            settlePermission(requestId, { outcome: { outcome: "cancelled" } });
+        }
+    };
+
     const connection = acp
         .client({ name: "foe" })
         .onNotification(acp.methods.client.session.update, ({ params }) => {
@@ -102,8 +126,19 @@ async function startAgentProcess({
                 onUpdate(params.update);
             }
         })
-        .onRequest(acp.methods.client.session.requestPermission, ({ params }) =>
-            requestPermission(params),
+        .onRequest(
+            acp.methods.client.session.requestPermission,
+            ({ params, requestId }) =>
+                new Promise<acp.RequestPermissionResponse>((resolve) => {
+                    permissions.set(requestId, resolve);
+                    requestPermission(requestId, params).then(
+                        (response) => settlePermission(requestId, response),
+                        () =>
+                            settlePermission(requestId, {
+                                outcome: { outcome: "cancelled" },
+                            }),
+                    );
+                }),
         )
         .connect(stream);
 
@@ -111,9 +146,19 @@ async function startAgentProcess({
         const pid = child.pid;
         if (pid === undefined) return;
 
+        if (process.platform === "win32") {
+            child.kill(signal);
+            // SIGKILL is not real on Windows; taskkill force-kills the tree.
+            if (signal === "SIGKILL") {
+                spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
+                    stdio: "ignore",
+                });
+            }
+            return;
+        }
+
         try {
-            if (process.platform === "win32") child.kill(signal);
-            else process.kill(-pid, signal);
+            process.kill(-pid, signal);
         } catch {
             // already exited
         }
@@ -123,6 +168,7 @@ async function startAgentProcess({
     const close = async () => {
         if (closing) return;
         closing = true;
+        cancelPermissions();
         connection.close();
 
         if (child.exitCode !== null || child.signalCode !== null) return;
@@ -174,20 +220,40 @@ async function startAgentProcess({
 
     sessionId = session.sessionId;
 
+    let running = false;
+
+    const prompt = async (text: string) => {
+        if (running) throw new Error("prompt already running");
+        running = true;
+        try {
+            return await connection.agent.request(
+                acp.methods.agent.session.prompt,
+                {
+                    sessionId: session.sessionId,
+                    prompt: [{ type: "text", text }],
+                },
+            );
+        } finally {
+            running = false;
+            // A permission request cannot outlive its turn.
+            cancelPermissions();
+        }
+    };
+
+    const cancel = async () => {
+        cancelPermissions();
+        await connection.agent.notify(acp.methods.agent.session.cancel, {
+            sessionId: session.sessionId,
+        });
+    };
+
     return {
         sessionId: session.sessionId,
         authMethods,
         stderrTail,
         close,
-        prompt: (text) =>
-            connection.agent.request(acp.methods.agent.session.prompt, {
-                sessionId: session.sessionId,
-                prompt: [{ type: "text", text }],
-            }),
-        cancel: () =>
-            connection.agent.notify(acp.methods.agent.session.cancel, {
-                sessionId: session.sessionId,
-            }),
+        prompt,
+        cancel,
     };
 }
 
