@@ -10,7 +10,7 @@ Local, single-user web GUI that orchestrates multiple ACP coding agents. The bac
 | [M1 — Projects and presets](m1-projects/README.md)      | in progress | 2/8      | [M1.03](m1-projects/03-project-store.md)        |
 | [M2 — Agent process](m2-agent-process/README.md)        | in progress | 3/4      | [M2.04](m2-agent-process/04-script-test.md)     |
 | [M3 — WebSocket protocol](m3-websocket/README.md)       | done        | 4/4      | —                                               |
-| [M4 — Hardening and docs](m4-hardening/README.md)       | todo        | 0/7      | [M4.01](m4-hardening/01-teardown-heartbeat.md)  |
+| [M4 — Hardening and docs](m4-hardening/README.md)       | in progress | 1/7      | [M4.02](m4-hardening/02-limits-process-kill.md) |
 | [M5 — Frontend shell](m5-frontend-shell/README.md)      | todo        | 0/8      | [M5.01](m5-frontend-shell/01-catalog-deps.md)   |
 | [M6 — Streaming UI](m6-streaming-ui/README.md)          | todo        | 0/4      | [M6.01](m6-streaming-ui/01-chat-store.md)       |
 | [M7 — Permissions and errors](m7-permissions/README.md) | todo        | 0/4      | [M7.01](m7-permissions/01-permission-dialog.md) |

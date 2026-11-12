@@ -1,6 +1,6 @@
 # M4.01 — Teardown and heartbeat
 
-Status: todo
+Status: done
 Milestone: [M4](README.md)
 Refs: [Chat handler](../reference/backend.md#chat-handler), [Security and risks](../reference/security-and-risks.md)
 
@@ -25,6 +25,6 @@ Implemented in M3.02/M3.03; this step is verification only.
 
 ## Done when
 
-- [ ] `Ctrl+C` leaves no orphan agents
-- [ ] A stale socket is cleaned up after the heartbeat timeout
-- [ ] `ps` shows no agent after teardown
+- [x] `Ctrl+C` leaves no orphan agents
+- [x] A stale socket is cleaned up after the heartbeat timeout
+- [x] `ps` shows no agent after teardown
