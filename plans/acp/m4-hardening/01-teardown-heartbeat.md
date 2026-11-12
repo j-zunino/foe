@@ -14,12 +14,14 @@ No agent process survives shutdown or a dead socket.
 - `apps/server/src/lib/chat.ts`
 - `apps/server/src/routes/ws/chat.ts`
 
+Implemented in M3.02/M3.03; this step is verification only.
+
 ## Tasks
 
-- [ ] `onClose` tears down every live chat
-- [ ] Socket close resolves permissions, kills the agent, and clears timers
-- [ ] Ping every 30 seconds; terminate a socket that misses a pong
-- [ ] Closing a chat removes it from the chat map
+- [x] `onClose` tears down every live chat
+- [x] Socket close resolves permissions, kills the agent, and clears timers
+- [x] Ping every 30 seconds; terminate a socket that misses a pong
+- [x] Closing a chat removes it from the chat map
 
 ## Done when
 

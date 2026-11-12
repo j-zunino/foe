@@ -12,7 +12,7 @@ Expose one chat per socket with start, prompt, permission, cancel, and teardown.
 
 - [x] [M3.01 Protocol types](01-protocol-types.md)
 - [x] [M3.02 Chat handler](02-chat-handler.md)
-- [ ] [M3.03 WebSocket route](03-ws-route.md)
+- [x] [M3.03 WebSocket route](03-ws-route.md)
 - [ ] [M3.04 Integration tests](04-integration-tests.md)
 
 ## Milestone done when

@@ -15,19 +15,18 @@ export function buildApp({ db, sqlite }: DatabaseHandle) {
 
 M1 adds the `projects` service (imported directly by routes); M2 adds `agents` presets. Augment Fastify instance types next to any decorators you add.
 
+`buildApp()` registers `@fastify/websocket` (`maxPayload: acp.DEFAULT_MAX_MESSAGE_BYTES`) and the `routes` plugin, which mounts REST under `/api` and `GET /ws`. Integration tests therefore get the complete app from the factory.
+
 `index.ts` then:
 
 1. Loads config (`loadConfig`, `loadAgents`).
 2. Opens the database with the resolved `DATABASE_FILE` and `<repo>/database/migrations`.
 3. Builds the app.
-4. Registers `@fastify/websocket` with `maxPayload: acp.DEFAULT_MAX_MESSAGE_BYTES`.
-5. Registers the REST plugin at `/api`.
-6. Registers `GET /ws`.
-7. Adds an `onClose` hook that closes all live chats, kills their processes, then closes the database.
-8. Binds `127.0.0.1` by default; warns when `HOST` is not loopback.
-9. On `SIGINT` / `SIGTERM` calls `app.close()`, then exits.
+4. Logs the bind address, agents file, and resolved database path.
+5. Binds `127.0.0.1` by default; warns when `HOST` is not loopback.
+6. On `SIGINT` / `SIGTERM` calls `app.close()`, then exits.
 
-`onClose` is the only shutdown path. Startup logs the bind address, agents file, and resolved database path. A database that cannot be opened fails startup with a message naming the resolved path.
+`onClose` is the only shutdown path: it tears down all live chats (killing their processes) and then closes the database. A database that cannot be opened fails startup with a message naming the resolved path.
 
 ## Config
 

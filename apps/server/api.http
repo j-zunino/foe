@@ -1,5 +1,7 @@
 @baseUrl = http://localhost:8787/api
+@wsUrl = ws://localhost:8787/ws
 @projectId = d09b0923-5d4b-4359-bac9-0eccd626da0e
+@agentId = fake
 
 ### Health
 GET {{baseUrl}}/health
@@ -39,3 +41,22 @@ DELETE {{baseUrl}}/projects/{{projectId}}
 
 ### Agents
 GET {{baseUrl}}/agents
+
+### Chat: start, prompt, cancel
+# @websocket timeout=10s idle-timeout=30s max-message-bytes=1mb
+# @ws send-json {"type":"start","projectId":"{{projectId}}","agentId":"{{agentId}}"}
+# @ws wait 2s
+# @ws send-json {"type":"prompt","text":"hello"}
+# @ws wait 1s
+# @ws send-json {"type":"cancel"}
+GET {{wsUrl}}
+
+### Chat: permission round-trip
+# Copy requestId from the permission_request frame, then reply from the
+# interactive console (Stream tab: g+w, i):
+# {"type":"permission","requestId":"<id>","optionId":"proceed_once"}
+# @websocket timeout=10s idle-timeout=30s max-message-bytes=1mb
+# @ws send-json {"type":"start","projectId":"{{projectId}}","agentId":"{{agentId}}"}
+# @ws wait 2s
+# @ws send-json {"type":"prompt","text":"permission please"}
+GET {{wsUrl}}

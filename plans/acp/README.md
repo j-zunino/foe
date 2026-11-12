@@ -9,7 +9,7 @@ Local, single-user web GUI that orchestrates multiple ACP coding agents. The bac
 | [M0 — Scaffold and config](m0-scaffold/README.md)       | done        | 3/3      | —                                               |
 | [M1 — Projects and presets](m1-projects/README.md)      | in progress | 2/8      | [M1.03](m1-projects/03-project-store.md)        |
 | [M2 — Agent process](m2-agent-process/README.md)        | in progress | 3/4      | [M2.04](m2-agent-process/04-script-test.md)     |
-| [M3 — WebSocket protocol](m3-websocket/README.md)       | in progress | 2/4      | [M3.03](m3-websocket/03-ws-route.md)            |
+| [M3 — WebSocket protocol](m3-websocket/README.md)       | in progress | 3/4      | [M3.04](m3-websocket/04-integration-tests.md)   |
 | [M4 — Hardening and docs](m4-hardening/README.md)       | todo        | 0/7      | [M4.01](m4-hardening/01-teardown-heartbeat.md)  |
 | [M5 — Frontend shell](m5-frontend-shell/README.md)      | todo        | 0/8      | [M5.01](m5-frontend-shell/01-catalog-deps.md)   |
 | [M6 — Streaming UI](m6-streaming-ui/README.md)          | todo        | 0/4      | [M6.01](m6-streaming-ui/01-chat-store.md)       |
