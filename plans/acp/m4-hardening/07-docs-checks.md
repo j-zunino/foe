@@ -17,10 +17,10 @@ Verify the docs work from a clean slate.
 ## Tasks
 
 - [ ] A fresh clone runs the fake agent end to end using only the README
-- [ ] Every command in `docs/agent-presets.md` is copy-pasteable
-- [ ] Absolute paths are used where the backend requires them
-- [ ] The WS example in `docs/protocol.md` matches `src/protocol.ts`
-- [ ] Run the backend manual checklist
+- [x] Every command in `docs/agent-presets.md` is copy-pasteable
+- [x] Absolute paths are used where the backend requires them
+- [x] The WS example in `docs/protocol.md` matches `packages/protocol/src/ws.ts`
+- [x] Run the backend manual checklist (fake agent)
 
 ## Done when
 

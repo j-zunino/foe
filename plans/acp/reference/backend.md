@@ -70,7 +70,7 @@ Example `config/agents.json`:
             "id": "codex",
             "name": "Codex",
             "command": "npx",
-            "args": ["-y", "@agentclientprotocol/codex-acp"],
+            "args": ["-y", "@agentclientprotocol/codex-acp@2.6.0"],
             "env": {}
         }
     ]

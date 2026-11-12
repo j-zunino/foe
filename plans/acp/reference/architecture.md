@@ -154,7 +154,7 @@ No router, state management library, UI kit, or Markdown renderer in v1.
 | Repo                | This `foe` monorepo (pnpm workspaces + turbo)                                                                              |
 | Stack               | Fastify + zod + `@fastify/websocket`/`ws`; React + Vite on the client                                                      |
 | Milestone order     | Backend M0–M4, then UI M5–M7                                                                                               |
-| Protocol types      | `apps/server/src/protocol.ts` until M5, then `packages/protocol`                                                           |
+| Protocol types      | `packages/protocol` (`@repo/protocol`)                                                                                     |
 | Protocol            | ACP v1 stable (`@agentclientprotocol/sdk` 2.1.0)                                                                           |
 | ACP client surface  | `initialize`, `session/new`, `session/prompt`, `session/cancel`; handles `session/update` and `session/request_permission` |
 | Filesystem          | Not implemented. Advertise `fs: { readTextFile: false, writeTextFile: false }`                                             |

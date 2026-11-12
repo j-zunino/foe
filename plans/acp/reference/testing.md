@@ -68,7 +68,9 @@ const app = acp
     .onRequest(acp.methods.agent.initialize, () => ({
         protocolVersion: acp.PROTOCOL_VERSION,
     }))
-    .onRequest(acp.methods.agent.session.new, () => ({ sessionId: `fake-${process.pid}-s${++sessionCount}` }))
+    .onRequest(acp.methods.agent.session.new, () => ({
+        sessionId: `fake-${process.pid}-s${++sessionCount}`,
+    }))
     .onRequest(acp.methods.agent.session.prompt, ({ params, client }) =>
         runPrompt(params, client),
     )
@@ -120,4 +122,4 @@ UI (M5–M7):
 
 - A fresh clone can run the fake agent end to end using only the README.
 - Every command in `docs/agent-presets.md` is copy-pasteable and uses absolute paths where required.
-- The WS protocol example in `docs/protocol.md` matches `apps/server/src/protocol.ts`.
+- The WS protocol example in `docs/protocol.md` matches `packages/protocol/src/ws.ts`.
