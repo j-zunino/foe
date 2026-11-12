@@ -8,14 +8,13 @@ import {
 } from "@repo/protocol";
 import type { FastifyInstance } from "fastify";
 import type WebSocket from "ws";
+import { START_TIMEOUT_MS } from "../config/env.js";
 import { projects } from "../services/projects.js";
 import {
     AgentStartError,
     startAgentProcess,
     type AgentProcess,
 } from "./agent-process.js";
-
-const START_TIMEOUT_MS = 10_000;
 
 interface Chat {
     id: string;

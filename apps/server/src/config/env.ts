@@ -2,6 +2,13 @@ import { resolve } from "node:path";
 import { z } from "zod";
 import { getRepoRoot } from "../lib/paths.js";
 
+// Fixed server tuning: not read from the environment, so they stay out of the schema.
+const BODY_LIMIT_BYTES = 1024 * 1024;
+const HEARTBEAT_MS = 30_000;
+const START_TIMEOUT_MS = 10_000;
+const STDERR_TAIL_BYTES = 8 * 1024;
+const KILL_GRACE_MS = 3_000;
+
 // Fallbacks for loadConfig — not the loaded config itself.
 const defaults = {
     HOST: "127.0.0.1",
@@ -33,4 +40,13 @@ function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     };
 }
 
-export { defaults, loadConfig, type Config };
+export {
+    BODY_LIMIT_BYTES,
+    defaults,
+    HEARTBEAT_MS,
+    KILL_GRACE_MS,
+    loadConfig,
+    START_TIMEOUT_MS,
+    STDERR_TAIL_BYTES,
+    type Config,
+};

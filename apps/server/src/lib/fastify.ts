@@ -7,6 +7,7 @@ import {
 } from "@fastify/type-provider-zod";
 import type { AgentPreset, ErrorResponse } from "@repo/protocol";
 import Fastify, { type FastifyError } from "fastify";
+import { BODY_LIMIT_BYTES } from "../config/env.js";
 import { routes } from "../routes/index.js";
 import { closeAllChats } from "./chat.js";
 import type { AppDatabase, DatabaseHandle, Sqlite } from "./db/index.js";
@@ -24,7 +25,7 @@ function buildApp({
     sqlite,
     agents,
 }: DatabaseHandle & { agents: AgentPreset[] }) {
-    const fastify = Fastify({ logger: true, bodyLimit: 1024 * 1024 })
+    const fastify = Fastify({ logger: true, bodyLimit: BODY_LIMIT_BYTES })
         .setValidatorCompiler(validatorCompiler)
         .setSerializerCompiler(serializerCompiler)
         .withTypeProvider<ZodTypeProvider>();
