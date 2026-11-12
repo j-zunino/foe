@@ -1,3 +1,5 @@
+import { DEFAULT_MAX_MESSAGE_BYTES } from "@agentclientprotocol/sdk";
+import websocket from "@fastify/websocket";
 import {
     serializerCompiler,
     validatorCompiler,
@@ -5,6 +7,7 @@ import {
 } from "@fastify/type-provider-zod";
 import type { AgentPreset, ErrorResponse } from "@repo/protocol";
 import Fastify, { type FastifyError } from "fastify";
+import { routes } from "../routes/index.js";
 import { closeAllChats } from "./chat.js";
 import type { AppDatabase, DatabaseHandle, Sqlite } from "./db/index.js";
 
@@ -60,6 +63,12 @@ function buildApp({
     fastify.decorate("db", db);
     fastify.decorate("sqlite", sqlite);
     fastify.decorate("agents", agents);
+
+    fastify.register(websocket, {
+        options: { maxPayload: DEFAULT_MAX_MESSAGE_BYTES },
+    });
+    fastify.register(routes);
+
     fastify.addHook("onClose", async (instance) => {
         await closeAllChats();
         instance.sqlite.close();

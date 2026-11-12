@@ -28,6 +28,8 @@ interface Chat {
 
 const chats = new Map<string, Chat>();
 
+type ChatApp = Pick<FastifyInstance, "db" | "agents">;
+
 function messageOf(error: unknown) {
     return error instanceof Error ? error.message : String(error);
 }
@@ -40,7 +42,7 @@ function send(ws: WebSocket, message: ServerMessage) {
 }
 
 // One socket owns one chat, one agent process, and one ACP session.
-function createChat(app: FastifyInstance, ws: WebSocket): Chat {
+function createChat(app: ChatApp, ws: WebSocket): Chat {
     const lifecycle = new AbortController();
     let closed = false;
     let started = false;

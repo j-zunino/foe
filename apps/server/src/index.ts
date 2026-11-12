@@ -4,7 +4,6 @@ import { loadConfig } from "./config/env.js";
 import { createDatabase } from "./lib/db/index.js";
 import { buildApp } from "./lib/fastify.js";
 import { getRepoRoot } from "./lib/paths.js";
-import { routes } from "./routes/index.js";
 
 let fastify: ReturnType<typeof buildApp> | undefined;
 
@@ -24,8 +23,6 @@ try {
         agents: agents.map((agent) => agent.id),
         database: config.DATABASE_FILE,
     });
-
-    fastify.register(routes, { prefix: "/api" });
 
     await fastify.listen({ host: config.HOST, port: config.PORT });
 } catch (error) {
