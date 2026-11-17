@@ -131,17 +131,16 @@ foe/
 │       └── src/
 │           ├── main.tsx
 │           ├── App.tsx
-│           ├── api.ts
 │           ├── chat-store.ts
 │           ├── components/
-│           └── styles.css
+│           └── index.css
 └── packages/
     ├── protocol/                # M5: @repo/protocol
     ├── eslint-config/
     └── typescript-config/
 ```
 
-No router, state management library, UI kit, or Markdown renderer in v1.
+No router, state management library, or Markdown renderer in v1.
 
 ## Decisions
 
@@ -153,6 +152,7 @@ No router, state management library, UI kit, or Markdown renderer in v1.
 | Deployment          | Local single user, bind `127.0.0.1`                                                                                        |
 | Repo                | This `foe` monorepo (pnpm workspaces + turbo)                                                                              |
 | Stack               | Fastify + zod + `@fastify/websocket`/`ws`; React + Vite on the client                                                      |
+| UI kit              | shadcn/base-ui with Tailwind 4 in `@repo/web`                                                                              |
 | Milestone order     | Backend M0–M4, then UI M5–M7                                                                                               |
 | Protocol types      | `packages/protocol` (`@repo/protocol`)                                                                                     |
 | Protocol            | ACP v1 stable (`@agentclientprotocol/sdk` 2.1.0)                                                                           |

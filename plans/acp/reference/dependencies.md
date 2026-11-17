@@ -12,11 +12,12 @@
 
 Catalog: `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`. (`vite` is already in the catalog.)
 
+UI: `@repo/web` uses shadcn/base-ui with Tailwind 4, `@tabler/icons-react`, `class-variance-authority`, `cn`, `tw-animate-css`, and Geist/Inter fonts.
+
 ## Deliberately not added
 
 - HTTP framework other than Fastify
 - Async database driver or a second query layer
 - Router
 - State management library
-- UI kit
 - Markdown renderer
