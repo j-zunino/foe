@@ -131,7 +131,12 @@ function createChat(app: ChatApp, ws: WebSocket): Chat {
                             resolve(
                                 optionId === null
                                     ? { outcome: { outcome: "cancelled" } }
-                                    : { outcome: { outcome: "selected", optionId } },
+                                    : {
+                                          outcome: {
+                                              outcome: "selected",
+                                              optionId,
+                                          },
+                                      },
                             );
                         });
                         send(ws, {

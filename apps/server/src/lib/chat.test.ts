@@ -13,7 +13,10 @@ import { createDatabase } from "./db/index.js";
 import { buildApp } from "./fastify.js";
 import { getRepoRoot } from "./paths.js";
 
-type Frame<T extends ServerMessage["type"]> = Extract<ServerMessage, { type: T }>;
+type Frame<T extends ServerMessage["type"]> = Extract<
+    ServerMessage,
+    { type: T }
+>;
 
 const root = getRepoRoot();
 const migrationsDir = resolve(root, "database/migrations");
@@ -56,8 +59,7 @@ async function waitFor<T extends ServerMessage["type"]>(
             .slice(after)
             .find(
                 (frame): frame is Frame<T> =>
-                    frame.type === type &&
-                    predicate(frame as Frame<T>),
+                    frame.type === type && predicate(frame as Frame<T>),
             );
         if (frame) return frame;
         await sleep(25);
@@ -184,11 +186,9 @@ describe("chat websocket", () => {
 
         client.send({ type: "prompt", text: "permission please" });
         const request = await waitFor(client.frames, "permission_request");
-        expect(request.params.options.map((option) => option.optionId)).toEqual([
-            "proceed_once",
-            "proceed_always",
-            "cancel",
-        ]);
+        expect(request.params.options.map((option) => option.optionId)).toEqual(
+            ["proceed_once", "proceed_always", "cancel"],
+        );
 
         client.send({
             type: "permission",
@@ -232,7 +232,9 @@ describe("chat websocket", () => {
         const done = await waitFor(client.frames, "prompt_done");
 
         expect(done.stopReason).toBe("cancelled");
-        expect(client.frames.some((frame) => frame.type === "error")).toBe(false);
+        expect(client.frames.some((frame) => frame.type === "error")).toBe(
+            false,
+        );
     });
 
     it("surfaces an unsupported fs request as method-not-found", async () => {
@@ -251,9 +253,7 @@ describe("chat websocket", () => {
     });
 
     it("yields an error with authMethods when the agent requires auth", async () => {
-        const agents = [
-            { ...preset, env: { FAKE_AGENT_REQUIRE_AUTH: "1" } },
-        ];
+        const agents = [{ ...preset, env: { FAKE_AGENT_REQUIRE_AUTH: "1" } }];
         const { url, projectId } = await setup(agents);
         const client = await connect(url);
 
