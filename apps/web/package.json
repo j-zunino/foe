@@ -7,7 +7,6 @@
         "dev": "vite",
         "build": "tsc --noEmit && vite build",
         "lint": "eslint .",
-        "format": "prettier --write \"**/*.{ts,tsx}\"",
         "typecheck": "tsc --noEmit",
         "preview": "vite preview"
     },
@@ -37,8 +36,6 @@
         "eslint-plugin-react-hooks": "catalog:",
         "eslint-plugin-react-refresh": "catalog:",
         "globals": "catalog:",
-        "prettier": "catalog:",
-        "prettier-plugin-tailwindcss": "^0.8.1",
         "typescript": "catalog:",
         "typescript-eslint": "catalog:",
         "vite": "catalog:"

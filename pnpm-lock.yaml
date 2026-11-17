@@ -250,6 +250,9 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.9.6
+      prettier-plugin-tailwindcss:
+        specifier: ^0.8.1
+        version: 0.8.1(prettier@3.9.6)
       turbo:
         specifier: 2.11.10
         version: 2.11.10
@@ -393,12 +396,6 @@ importers:
       globals:
         specifier: 'catalog:'
         version: 17.13.0
-      prettier:
-        specifier: 'catalog:'
-        version: 3.9.6
-      prettier-plugin-tailwindcss:
-        specifier: ^0.8.1
-        version: 0.8.1(prettier@3.9.6)
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
