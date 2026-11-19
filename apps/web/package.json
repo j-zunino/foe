@@ -18,6 +18,7 @@
         "@tailwindcss/vite": "^4",
         "class-variance-authority": "^0.7.1",
         "cn": "^0.5.2",
+        "@tanstack/react-query": "catalog:",
         "react": "catalog:",
         "react-dom": "catalog:",
         "shadcn": "^4.23.0",
