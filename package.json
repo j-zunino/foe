@@ -12,7 +12,7 @@
     },
     "devDependencies": {
         "eslint": "catalog:",
-        "prettier": "catalog:",
+        "prettier": "3.9.6",
         "prettier-plugin-tailwindcss": "^0.8.1",
         "turbo": "2.11.10",
         "typescript": "catalog:"
