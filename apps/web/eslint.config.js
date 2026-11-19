@@ -10,7 +10,7 @@ export default defineConfig(
         },
     },
     {
-        files: ["src/components/**/*.tsx"],
+        files: ["src/components/**/*.tsx", "src/routes/**/*.tsx"],
         rules: { "react-refresh/only-export-components": "off" },
     },
 );
