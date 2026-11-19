@@ -1,6 +1,6 @@
 # M5.01 — Catalog dependencies
 
-Status: todo
+Status: done
 Milestone: [M5](README.md)
 Refs: [Dependencies](../reference/dependencies.md)
 
@@ -14,11 +14,11 @@ Add the React and Vite packages to the workspace catalog.
 
 ## Tasks
 
-- [ ] Add `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`
-- [ ] Confirm `vite` is already in the catalog
-- [ ] Run `pnpm install`
+- [x] Add `react`, `react-dom`, `@types/react`, `@types/react-dom`, `@vitejs/plugin-react`
+- [x] Confirm `vite` is already in the catalog
+- [x] Run `pnpm install`
 
 ## Done when
 
-- [ ] `pnpm install` succeeds
-- [ ] No package versions are duplicated outside the catalog
+- [x] `pnpm install` succeeds
+- [x] No package versions are duplicated outside the catalog

@@ -1,6 +1,6 @@
 # M5.04 — Web scaffold
 
-Status: todo
+Status: done
 Milestone: [M5](README.md)
 Refs: [Repository layout](../reference/architecture.md#repository-layout), [Frontend](../reference/frontend.md)
 
@@ -17,19 +17,19 @@ A Vite + React + TypeScript app with the dev proxy configured.
 - `apps/web/index.html` (new)
 - `apps/web/src/main.tsx` (new)
 - `apps/web/src/App.tsx` (new)
-- `apps/web/src/styles.css` (new)
+- `apps/web/src/index.css` (new)
 
 ## Tasks
 
-- [ ] Create `@repo/web`
-- [ ] Extend `@repo/typescript-config/vite.json`
-- [ ] Use `@repo/eslint-config/react`
-- [ ] Proxy `/api` and `/ws` to the server
-- [ ] Add the Vite React plugin
-- [ ] Render a minimal app shell
+- [x] Create `@repo/web`
+- [x] Extend `@repo/typescript-config/vite.json`
+- [x] Use `@repo/eslint-config/react`
+- [x] Proxy `/api` and `/ws` to the server
+- [x] Add the Vite React plugin
+- [x] Render a minimal app shell
 
 ## Done when
 
-- [ ] `pnpm --filter @repo/web dev` loads in the browser
-- [ ] `pnpm typecheck` and `pnpm lint` pass
-- [ ] The proxy reaches the backend
+- [x] `pnpm --filter @repo/web dev` loads in the browser
+- [x] `pnpm typecheck` and `pnpm lint` pass
+- [x] The proxy reaches the backend

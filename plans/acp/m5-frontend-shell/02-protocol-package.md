@@ -1,6 +1,6 @@
 # M5.02 — Shared protocol package
 
-Status: todo
+Status: done
 Milestone: [M5](README.md)
 Refs: [Architecture](../reference/architecture.md#repository-layout)
 
@@ -17,13 +17,13 @@ Move the frozen protocol into `@repo/protocol` with declarations.
 
 ## Tasks
 
-- [ ] Create `@repo/protocol`
-- [ ] Move the message types and zod schema from the server
-- [ ] Build to `dist` with declarations
-- [ ] Make turbo `^build` order protocol before server and web
+- [x] Create `@repo/protocol`
+- [x] Move the message types and zod schema from the server
+- [x] Build to `dist` with declarations
+- [x] Make turbo `^build` order protocol before server and web
 
 ## Done when
 
-- [ ] `pnpm build` builds protocol first
-- [ ] Both consumers can import the package
-- [ ] There is no second copy of the message types
+- [x] `pnpm build` builds protocol first
+- [x] Both consumers can import the package
+- [x] There is no second copy of the message types
