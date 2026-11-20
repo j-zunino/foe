@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toast.tsx";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
 import { router } from "@/router.tsx";
 import { RouterProvider } from "@tanstack/react-router";
@@ -13,7 +14,9 @@ if (!root) {
 createRoot(root).render(
     <StrictMode>
         <ThemeProvider>
-            <RouterProvider router={router} />
+            <Toaster>
+                <RouterProvider router={router} />
+            </Toaster>
         </ThemeProvider>
     </StrictMode>,
 );

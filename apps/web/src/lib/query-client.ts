@@ -1,17 +1,40 @@
-import { QueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/toast";
+import { ApiError } from "@/lib/http";
+import { QueryCache, QueryClient } from "@tanstack/react-query";
 
 export function createQueryClient() {
+    const queryCache = new QueryCache({
+        onError: (error) => {
+            toast.add({
+                id: "query-error",
+                type: "error",
+                title: "Request failed",
+                description: error.message,
+            });
+        },
+    });
+
     return new QueryClient({
+        queryCache,
         defaultOptions: {
             queries: {
                 staleTime: 60_000,
                 gcTime: 10 * 60_000,
                 refetchOnWindowFocus: false,
-                retry: 1,
+                // 4xx won't resolve by retrying; give 5xx a couple of attempts
+                retry: (failureCount, error) => {
+                    if (
+                        error instanceof ApiError &&
+                        error.status >= 400 &&
+                        error.status < 500
+                    ) {
+                        return false;
+                    }
+
+                    return failureCount < 2;
+                },
             },
-            mutations: {
-                retry: 0,
-            },
+            mutations: { retry: 0 },
         },
     });
 }
