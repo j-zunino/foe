@@ -5,14 +5,17 @@ import { projectApi } from "./api";
 import { projectKeys } from "./keys";
 
 export const projectQueries = {
-    list: () =>
-        queryOptions({
+    list: () => {
+        return queryOptions({
             queryKey: projectKeys.list(),
             queryFn: () => projectApi.list(),
-        }),
-    detail: (id: Project["id"]) =>
-        queryOptions({
+        });
+    },
+
+    detail: (id: Project["id"]) => {
+        return queryOptions({
             queryKey: projectKeys.detail(id),
             queryFn: () => projectApi.detail(id),
-        }),
+        });
+    },
 };

@@ -1,9 +1,25 @@
-import type { Project, Projects } from "@repo/protocol";
-
+import type { CreateProjectInput, Project, Projects } from "@repo/protocol";
 import { request } from "@/lib/http";
 
-// prettier-ignore
 export const projectApi = {
-    list: () => request<Projects>("/api/projects"),
-    detail: (id: Project["id"]) => request<Project>(`/api/projects/${encodeURIComponent(id)}`),
+    list: () => {
+        return request<Projects>("/api/projects");
+    },
+
+    detail: (id: Project["id"]) => {
+        return request<Project>(`/api/projects/${encodeURIComponent(id)}`);
+    },
+
+    add: (input: CreateProjectInput) => {
+        return request<Project>("/api/projects", {
+            method: "POST",
+            body: JSON.stringify(input),
+        });
+    },
+
+    remove: (id: Project["id"]) => {
+        return request<void>(`/api/projects/${encodeURIComponent(id)}`, {
+            method: "DELETE",
+        });
+    },
 };
