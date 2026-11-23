@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { loadConfig } from "./lib/env.js";
-import { loadAgents } from "./features/agents/index.js";
+import { loadAgents } from "./features/agents/config.js";
 import { createDatabase } from "./lib/db/index.js";
 import { buildApp } from "./app.js";
 import { getRepoRoot } from "./lib/paths.js";

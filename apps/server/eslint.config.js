@@ -18,4 +18,10 @@ export default defineConfig(
             "@typescript-eslint/require-await": "off",
         },
     },
+    {
+        files: ["src/**/*.ts", "fixtures/**/*.ts"],
+        rules: {
+            "no-restricted-imports": "off",
+        },
+    },
 );
