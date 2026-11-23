@@ -1,4 +1,4 @@
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/components/ui/toast.tsx";
 import type { CreateProjectInput, Project } from "@repo/protocol";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

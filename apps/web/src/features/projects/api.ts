@@ -1,5 +1,5 @@
 import type { CreateProjectInput, Project, Projects } from "@repo/protocol";
-import { request } from "@/lib/http";
+import { request } from "@/lib/http.ts";
 
 export const projectApi = {
     list: () => {
