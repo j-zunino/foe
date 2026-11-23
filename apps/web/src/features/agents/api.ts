@@ -1,5 +1,5 @@
 import type { Agents } from "@repo/protocol";
-import { request } from "@/lib/http";
+import { request } from "@/lib/http.ts";
 
 export const agentApi = {
     list: () => {

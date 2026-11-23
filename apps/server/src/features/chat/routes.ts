@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from "@fastify/type-provider-zod";
 import type WebSocket from "ws";
-import { HEARTBEAT_MS } from "../../config/env.js";
-import { createChat } from "../../lib/chat.js";
+import { HEARTBEAT_MS } from "../../lib/env.js";
+import { createChat } from "./chat.js";
 
 // Server pings every 30s; a socket that misses a pong is terminated.
 function heartbeat(ws: WebSocket) {

@@ -1,5 +1,5 @@
-import { toast } from "@/components/ui/toast";
-import { ApiError } from "@/lib/http";
+import { toast } from "@/components/ui/toast.tsx";
+import { ApiError } from "@/lib/http.ts";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 
 export function createQueryClient() {

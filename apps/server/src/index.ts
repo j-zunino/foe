@@ -1,8 +1,8 @@
 import { resolve } from "node:path";
-import { loadAgents } from "./config/agent.js";
-import { loadConfig } from "./config/env.js";
+import { loadConfig } from "./lib/env.js";
+import { loadAgents } from "./features/agents/config.js";
 import { createDatabase } from "./lib/db/index.js";
-import { buildApp } from "./lib/fastify.js";
+import { buildApp } from "./app.js";
 import { getRepoRoot } from "./lib/paths.js";
 
 let fastify: ReturnType<typeof buildApp> | undefined;

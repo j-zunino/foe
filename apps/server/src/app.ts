@@ -7,10 +7,10 @@ import {
 } from "@fastify/type-provider-zod";
 import type { AgentPreset, ErrorResponse } from "@repo/protocol";
 import Fastify, { type FastifyError } from "fastify";
-import { BODY_LIMIT_BYTES } from "../config/env.js";
-import { routes } from "../routes/index.js";
-import { closeAllChats } from "./chat.js";
-import type { AppDatabase, DatabaseHandle, Sqlite } from "./db/index.js";
+import { BODY_LIMIT_BYTES } from "./lib/env.js";
+import { routes } from "./routes.js";
+import { closeAllChats } from "./features/chat/chat.js";
+import type { AppDatabase, DatabaseHandle, Sqlite } from "./lib/db/index.js";
 
 declare module "fastify" {
     interface FastifyInstance {

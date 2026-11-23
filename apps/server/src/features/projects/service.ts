@@ -1,9 +1,9 @@
 import type { CreateProjectInput, Project } from "@repo/protocol";
 import { asc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
-import type { AppDatabase } from "../lib/db/index.js";
-import { projects as projectsTable } from "../lib/db/schema.js";
-import { httpError } from "../lib/http-error.js";
+import type { AppDatabase } from "../../lib/db/index.js";
+import { httpError } from "../../lib/http-error.js";
+import { projectsTable } from "./schema.js";
 
 const projects = {
     async list(db: AppDatabase) {

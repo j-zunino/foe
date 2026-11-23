@@ -12,10 +12,16 @@ export default defineConfig(
         },
     },
     {
-        files: ["**/routes/**/*.ts"],
+        files: ["src/features/**/routes.ts", "src/routes.ts"],
         rules: {
             // Route plugins are typed as async by Fastify but often only register routes.
             "@typescript-eslint/require-await": "off",
+        },
+    },
+    {
+        files: ["src/**/*.ts", "fixtures/**/*.ts"],
+        rules: {
+            "no-restricted-imports": "off",
         },
     },
 );

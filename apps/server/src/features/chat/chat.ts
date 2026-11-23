@@ -8,8 +8,8 @@ import {
 } from "@repo/protocol";
 import type { FastifyInstance } from "fastify";
 import type WebSocket from "ws";
-import { START_TIMEOUT_MS } from "../config/env.js";
-import { projects } from "../services/projects.js";
+import { START_TIMEOUT_MS } from "../../lib/env.js";
+import { projects } from "../projects/service.js";
 import {
     AgentStartError,
     startAgentProcess,

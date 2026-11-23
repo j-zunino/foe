@@ -4,7 +4,7 @@
 
 The browser never speaks ACP. It sends and receives only the messages defined here; the backend is the ACP client. The source of truth is [`packages/protocol/src/ws.ts`](../packages/protocol/src/ws.ts).
 
-REST (`/api`) is a separate, unrelated surface documented by its routes in `apps/server/src/routes/api/`.
+REST (`/api`) is a separate, unrelated surface documented by its routes in `apps/server/src/features/`.
 
 ## Endpoint
 

@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { Readable, Writable } from "node:stream";
 import * as acp from "@agentclientprotocol/sdk";
 import type { AgentPreset } from "@repo/protocol";
-import { KILL_GRACE_MS, STDERR_TAIL_BYTES } from "../config/env.js";
+import { KILL_GRACE_MS, STDERR_TAIL_BYTES } from "../../lib/env.js";
 
 function messageOf(error: unknown) {
     return error instanceof Error ? error.message : String(error);
