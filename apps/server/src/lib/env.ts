@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import { z } from "zod";
-import { getRepoRoot } from "../lib/paths.js";
+import { getRepoRoot } from "./paths.js";
 
 // Fixed server tuning: not read from the environment, so they stay out of the schema.
 const BODY_LIMIT_BYTES = 1024 * 1024;

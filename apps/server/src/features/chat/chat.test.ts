@@ -8,10 +8,10 @@ import { join, resolve } from "node:path";
 import type { AgentPreset, ClientMessage, ServerMessage } from "@repo/protocol";
 import { afterEach, describe, expect, it } from "vitest";
 import WebSocket from "ws";
-import { projects } from "../services/projects.js";
-import { createDatabase } from "./db/index.js";
-import { buildApp } from "./fastify.js";
-import { getRepoRoot } from "./paths.js";
+import { projects } from "../projects/service.js";
+import { buildApp } from "../../app.js";
+import { createDatabase } from "../../lib/db/index.js";
+import { getRepoRoot } from "../../lib/paths.js";
 
 type Frame<T extends ServerMessage["type"]> = Extract<
     ServerMessage,

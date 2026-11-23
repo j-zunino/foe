@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { agentPresetsFileSchema, type AgentPreset } from "@repo/protocol";
-import { getRepoRoot } from "../lib/paths.js";
+import { getRepoRoot } from "../../lib/paths.js";
 
 // `./` paths are relative to the repo root; turbo runs with the package dir as cwd.
 function loadAgents(file: string, root = getRepoRoot()): AgentPreset[] {

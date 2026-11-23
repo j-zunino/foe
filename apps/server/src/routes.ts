@@ -1,9 +1,9 @@
 import type { FastifyPluginAsyncZod } from "@fastify/type-provider-zod";
 
-import { agentsRoutes } from "./api/agents.js";
-import { healthRoutes } from "./api/health.js";
-import { projectsRoutes } from "./api/projects.js";
-import { chatRoutes } from "./ws/chat.js";
+import { agentsRoutes } from "./features/agents/index.js";
+import { chatRoutes } from "./features/chat/index.js";
+import { healthRoutes } from "./features/health/index.js";
+import { projectsRoutes } from "./features/projects/index.js";
 
 const routes: FastifyPluginAsyncZod = async (fastify) => {
     fastify.register(

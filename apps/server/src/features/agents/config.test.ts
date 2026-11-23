@@ -2,8 +2,8 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getRepoRoot } from "../lib/paths.js";
-import { loadAgents } from "./agent.js";
+import { getRepoRoot } from "../../lib/paths.js";
+import { loadAgents } from "./config.js";
 
 const root = getRepoRoot();
 

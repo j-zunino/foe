@@ -18,7 +18,7 @@ src/
 
 - A schema used by routes, services, or config loaders lives here.
 - A schema used by exactly one route may stay inline in that route file.
-- Server-only infrastructure (for example the env schema in `apps/server/src/config/env.ts`) stays local.
+- Server-only infrastructure (for example the env schema in `apps/server/src/lib/env.ts`) stays local.
 
 ## Conventions
 

@@ -7,7 +7,7 @@ import {
 import { basename } from "node:path";
 import { httpError } from "../../lib/http-error.js";
 import { resolveDirectory } from "../../lib/paths.js";
-import { projects } from "../../services/projects.js";
+import { projects } from "./service.js";
 
 const projectsRoutes: FastifyPluginAsyncZod = async (fastify) => {
     fastify.get(

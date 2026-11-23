@@ -1,13 +1,13 @@
 import { resolve } from "node:path";
 import { defineConfig } from "drizzle-kit";
 
-import { defaults } from "./src/config/env.js";
+import { defaults } from "./src/lib/env.js";
 import { getRepoRoot } from "./src/lib/paths.js";
 
 const root = getRepoRoot();
 
 export default defineConfig({
-    schema: "./src/lib/db/schema.ts",
+    schema: "./src/features/**/schema.ts",
     out: resolve(root, "database/migrations"),
     dialect: "sqlite",
     dbCredentials: {
